@@ -15,7 +15,6 @@ import {
   Gamepad2,
   Loader2,
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -81,231 +80,224 @@ export default function GeneratePage() {
   };
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
+    <div className="p-6 sm:p-8 lg:p-10 max-w-7xl mx-auto space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-3">
+        <h1 className="text-3xl font-extrabold text-white tracking-tight heading-brutal flex items-center gap-3">
           Generate Content
-          <span className="rounded-full bg-blue-600/20 px-3 py-1 text-xs font-semibold text-blue-400">
+          <span className="neon-badge">
             AI
           </span>
         </h1>
-        <p className="text-sm text-gray-500 mt-1">
+        <p className="text-sm text-white/35 mt-2">
           Create AI-powered content for your brand
         </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
         {/* Form */}
-        <Card className="lg:col-span-2 bg-gray-900/50 border-white/[0.06]">
-          <CardHeader className="border-b border-white/[0.06] pb-4">
-            <CardTitle className="text-sm font-semibold text-white flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-blue-400" />
-              Generation Settings
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-5 space-y-5">
-            <div>
-              <label className="block text-xs font-medium text-gray-400 mb-2 uppercase tracking-wider">
-                Campaign
-              </label>
-              <select
-                value={form.campaign}
-                onChange={(e) =>
-                  setForm({ ...form, campaign: e.target.value })
-                }
-                className="w-full rounded-lg bg-white/[0.05] border border-white/[0.08] px-3 py-2.5 text-sm text-white outline-none cursor-pointer"
-              >
-                <option value="">Select campaign</option>
-                <option value="summer">Summer Collection</option>
-                <option value="holiday">Holiday Campaign</option>
-                <option value="brand">Brand Awareness</option>
-                <option value="product">Product Launch</option>
-              </select>
-            </div>
+        <div className="lg:col-span-2 glass p-5 space-y-5">
+          <div className="flex items-center gap-2 pb-4 border-b border-white/[0.06]">
+            <Sparkles className="h-4 w-4 text-[#00ff88]/70" />
+            <h2 className="text-sm font-semibold text-white heading-brutal">Generation Settings</h2>
+          </div>
 
-            <div>
-              <label className="block text-xs font-medium text-gray-400 mb-2 uppercase tracking-wider">
-                Platform
-              </label>
-              <div className="grid grid-cols-3 gap-2">
-                {platformOptions.map((p) => (
-                  <button
-                    key={p.value}
-                    onClick={() =>
-                      setForm({ ...form, platform: p.value })
-                    }
-                    className={`flex flex-col items-center gap-1.5 rounded-lg border p-3 text-xs font-medium transition-all ${
-                      form.platform === p.value
-                        ? "bg-blue-600/15 border-blue-500/30 text-blue-400"
-                        : "bg-white/[0.03] border-white/[0.06] text-gray-500 hover:text-gray-300 hover:border-white/[0.12]"
-                    }`}
-                  >
-                    <p.icon className="h-4 w-4" />
-                    {p.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium text-gray-400 mb-2 uppercase tracking-wider">
-                Content Vertical
-              </label>
-              <div className="flex flex-wrap gap-2">
-                {verticalOptions.map((v) => (
-                  <button
-                    key={v}
-                    onClick={() => setForm({ ...form, vertical: v })}
-                    className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-all ${
-                      form.vertical === v
-                        ? "bg-purple-600/15 border-purple-500/30 text-purple-400"
-                        : "bg-white/[0.03] border-white/[0.06] text-gray-500 hover:text-gray-300 hover:border-white/[0.12]"
-                    }`}
-                  >
-                    {v}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium text-gray-400 mb-2 uppercase tracking-wider">
-                Topic / Theme
-              </label>
-              <Input
-                placeholder="e.g., Summer pet care tips"
-                value={form.topic}
-                onChange={(e) =>
-                  setForm({ ...form, topic: e.target.value })
-                }
-                className="bg-white/[0.05] border-white/[0.08] text-white placeholder:text-gray-600 focus:border-blue-500/50"
-              />
-            </div>
-
-            <Button
-              onClick={handleGenerate}
-              disabled={generating || !form.topic}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-40 disabled:cursor-not-allowed"
+          <div>
+            <label className="block text-[10px] font-medium text-white/30 mb-2 font-mono uppercase tracking-[0.15em]">
+              Campaign
+            </label>
+            <select
+              value={form.campaign}
+              onChange={(e) =>
+                setForm({ ...form, campaign: e.target.value })
+              }
+              className="w-full rounded-xl glass-select px-3 py-2.5 text-sm cursor-pointer"
             >
-              {generating ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Generating...
-                </>
-              ) : (
-                <>
-                  <Sparkles className="h-4 w-4 mr-2" />
-                  Generate Content
-                </>
-              )}
-            </Button>
-          </CardContent>
-        </Card>
+              <option value="">Select campaign</option>
+              <option value="summer">Summer Collection</option>
+              <option value="holiday">Holiday Campaign</option>
+              <option value="brand">Brand Awareness</option>
+              <option value="product">Product Launch</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-[10px] font-medium text-white/30 mb-2 font-mono uppercase tracking-[0.15em]">
+              Platform
+            </label>
+            <div className="grid grid-cols-3 gap-2">
+              {platformOptions.map((p) => (
+                <button
+                  key={p.value}
+                  onClick={() =>
+                    setForm({ ...form, platform: p.value })
+                  }
+                  className={`flex flex-col items-center gap-1.5 rounded-xl border p-3 text-xs font-medium transition-all duration-200 ${
+                    form.platform === p.value
+                      ? "bg-[#00ff88]/10 border-[#00ff88]/25 text-[#00ff88]"
+                      : "bg-white/[0.03] border-white/[0.06] text-white/30 hover:text-white/60 hover:border-white/[0.12]"
+                  }`}
+                >
+                  <p.icon className="h-4 w-4" />
+                  {p.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-[10px] font-medium text-white/30 mb-2 font-mono uppercase tracking-[0.15em]">
+              Content Vertical
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {verticalOptions.map((v) => (
+                <button
+                  key={v}
+                  onClick={() => setForm({ ...form, vertical: v })}
+                  className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-all duration-200 ${
+                    form.vertical === v
+                      ? "bg-purple-500/10 border-purple-500/25 text-purple-400"
+                      : "bg-white/[0.03] border-white/[0.06] text-white/30 hover:text-white/60 hover:border-white/[0.12]"
+                  }`}
+                >
+                  {v}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-[10px] font-medium text-white/30 mb-2 font-mono uppercase tracking-[0.15em]">
+              Topic / Theme
+            </label>
+            <Input
+              placeholder="e.g., Summer pet care tips"
+              value={form.topic}
+              onChange={(e) =>
+                setForm({ ...form, topic: e.target.value })
+              }
+              className="glass-input"
+            />
+          </div>
+
+          <Button
+            onClick={handleGenerate}
+            disabled={generating || !form.topic}
+            className="w-full bg-[#00ff88] hover:bg-[#00cc6a] text-[#050505] font-semibold disabled:opacity-20 disabled:cursor-not-allowed transition-all duration-200 glow-sm hover:scale-[1.02]"
+          >
+            {generating ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Generating...
+              </>
+            ) : (
+              <>
+                <Sparkles className="h-4 w-4 mr-2" />
+                Generate Content
+              </>
+            )}
+          </Button>
+        </div>
 
         {/* Preview */}
         <div className="lg:col-span-3 space-y-4">
           {generating && (
-            <Card className="bg-gray-900/50 border-white/[0.06]">
-              <CardContent className="p-12 text-center">
-                <div className="flex flex-col items-center gap-4">
-                  <div className="relative">
-                    <Loader2 className="h-10 w-10 text-blue-400 animate-spin" />
-                    <Sparkles className="h-5 w-5 text-blue-300 absolute -top-1 -right-1 animate-pulse" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-white">
-                      Creating your content...
-                    </p>
-                    <p className="text-xs text-gray-600 mt-1">
-                      Our AI is crafting the perfect post
-                    </p>
-                  </div>
-                  <div className="flex gap-1">
-                    {[1, 2, 3].map((i) => (
-                      <div
-                        key={i}
-                        className="h-1.5 w-1.5 rounded-full bg-blue-400 animate-bounce"
-                        style={{ animationDelay: `${i * 0.15}s` }}
-                      />
-                    ))}
-                  </div>
+            <div className="glass p-12 text-center">
+              <div className="flex flex-col items-center gap-4">
+                <div className="relative">
+                  <Loader2 className="h-10 w-10 text-[#00ff88] animate-spin" />
+                  <Sparkles className="h-5 w-5 text-[#00ff88]/60 absolute -top-1 -right-1 animate-pulse" />
                 </div>
-              </CardContent>
-            </Card>
+                <div>
+                  <p className="text-sm font-medium text-white">
+                    Creating your content...
+                  </p>
+                  <p className="text-xs text-white/25 mt-1">
+                    Our AI is crafting the perfect post
+                  </p>
+                </div>
+                <div className="flex gap-1">
+                  {[1, 2, 3].map((i) => (
+                    <div
+                      key={i}
+                      className="h-1.5 w-1.5 rounded-full bg-[#00ff88] animate-bounce"
+                      style={{ animationDelay: `${i * 0.15}s` }}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
           )}
 
           {!generating && generated.length === 0 && (
-            <Card className="bg-gray-900/50 border-white/[0.06]">
-              <CardContent className="p-16 text-center">
-                <div className="flex flex-col items-center gap-3">
-                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-600/10 border border-blue-500/20">
-                    <Sparkles className="h-7 w-7 text-blue-400" />
-                  </div>
-                  <p className="text-sm font-medium text-gray-400">
-                    Your generated content will appear here
-                  </p>
-                  <p className="text-xs text-gray-600 max-w-sm">
-                    Configure your settings and click Generate to create
-                    AI-powered content for your brand
-                  </p>
+            <div className="glass p-16 text-center">
+              <div className="flex flex-col items-center gap-3">
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#00ff88]/6 border border-[#00ff88]/10">
+                  <Sparkles className="h-7 w-7 text-[#00ff88]/40" />
                 </div>
-              </CardContent>
-            </Card>
+                <p className="text-sm font-medium text-white/40">
+                  Your generated content will appear here
+                </p>
+                <p className="text-xs text-white/20 max-w-sm">
+                  Configure your settings and click Generate to create
+                  AI-powered content for your brand
+                </p>
+              </div>
+            </div>
           )}
 
           {generated.map((item, i) => (
-            <Card
+            <div
               key={i}
-              className="bg-gray-900/50 border-white/[0.06] hover:border-white/[0.12] transition-colors"
+              className="glass glass-hover transition-all duration-200"
             >
-              <CardHeader className="pb-3">
+              <div className="px-5 py-4 border-b border-white/[0.06]">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span className="rounded-md bg-purple-500/10 px-2 py-0.5 text-[10px] font-medium text-purple-400">
+                    <span className="rounded-md bg-purple-500/8 border border-purple-500/12 px-2 py-0.5 text-[10px] font-medium text-purple-400 font-mono">
                       {item.type}
                     </span>
-                    <CardTitle className="text-sm font-semibold text-white">
+                    <h3 className="text-sm font-semibold text-white heading-brutal">
                       {item.title}
-                    </CardTitle>
+                    </h3>
                   </div>
                   <div className="flex items-center gap-1">
                     <button
                       onClick={() => handleCopy(item.caption, i)}
-                      className="p-1.5 rounded-md hover:bg-white/[0.06] text-gray-600 hover:text-white transition-colors"
+                      className="p-1.5 rounded-lg hover:bg-white/[0.06] text-white/20 hover:text-white/60 transition-all duration-200"
                       title="Copy"
                     >
                       {copiedIndex === i ? (
-                        <Check className="h-3.5 w-3.5 text-green-400" />
+                        <Check className="h-3.5 w-3.5 text-[#00ff88]" />
                       ) : (
                         <Copy className="h-3.5 w-3.5" />
                       )}
                     </button>
                     <button
                       onClick={handleGenerate}
-                      className="p-1.5 rounded-md hover:bg-white/[0.06] text-gray-600 hover:text-white transition-colors"
+                      className="p-1.5 rounded-lg hover:bg-white/[0.06] text-white/20 hover:text-white/60 transition-all duration-200"
                       title="Regenerate"
                     >
                       <RefreshCw className="h-3.5 w-3.5" />
                     </button>
                   </div>
                 </div>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <div className="rounded-lg bg-white/[0.03] border border-white/[0.06] p-4">
-                  <p className="text-sm text-gray-300 whitespace-pre-wrap leading-relaxed">
+              </div>
+              <div className="p-5">
+                <div className="rounded-xl bg-white/[0.03] border border-white/[0.06] p-4">
+                  <p className="text-sm text-white/60 whitespace-pre-wrap leading-relaxed">
                     {item.caption}
                   </p>
                 </div>
                 <div className="flex items-center justify-between mt-4">
-                  <span className="text-[10px] text-gray-600 font-medium uppercase tracking-wider">
+                  <span className="text-[10px] text-white/20 font-mono uppercase tracking-wider">
                     {item.caption.split(" ").length} words
                   </span>
                   <div className="flex items-center gap-2">
                     <Button
                       size="sm"
                       variant="ghost"
-                      className="text-xs text-gray-500 hover:text-white h-7"
+                      className="text-xs text-white/30 hover:text-white/60 h-7 transition-colors duration-200"
                       onClick={() => handleCopy(item.caption, i)}
                     >
                       <Copy className="h-3 w-3 mr-1" />
@@ -313,15 +305,15 @@ export default function GeneratePage() {
                     </Button>
                     <Button
                       size="sm"
-                      className="text-xs bg-blue-600/15 text-blue-400 hover:bg-blue-600/25 h-7 border-0"
+                      className="text-xs bg-[#00ff88]/10 text-[#00ff88] hover:bg-[#00ff88]/15 h-7 border-0 font-mono transition-all duration-200"
                     >
                       <Send className="h-3 w-3 mr-1" />
                       Publish
                     </Button>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           ))}
         </div>
       </div>

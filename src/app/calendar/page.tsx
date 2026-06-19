@@ -8,10 +8,8 @@ import {
   Calendar as CalendarIcon,
   X,
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 
 const MONTHS = [
   "January",
@@ -39,15 +37,15 @@ interface CalendarEvent {
 }
 
 const effortColors: Record<string, string> = {
-  low: "bg-green-500/20 border-green-500/30 text-green-400",
-  medium: "bg-yellow-500/20 border-yellow-500/30 text-yellow-400",
-  high: "bg-red-500/20 border-red-500/30 text-red-400",
+  low: "bg-[#00ff88]/8 border-[#00ff88]/15 text-[#00ff88]",
+  medium: "bg-[#ffaa00]/8 border-[#ffaa00]/15 text-[#ffaa00]",
+  high: "bg-[#ff3366]/8 border-[#ff3366]/15 text-[#ff3366]",
 };
 
 const effortDotColors: Record<string, string> = {
-  low: "bg-green-400",
-  medium: "bg-yellow-400",
-  high: "bg-red-400",
+  low: "bg-[#00ff88]",
+  medium: "bg-[#ffaa00]",
+  high: "bg-[#ff3366]",
 };
 
 export default function CalendarPage() {
@@ -134,20 +132,20 @@ export default function CalendarPage() {
   };
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
+    <div className="p-6 sm:p-8 lg:p-10 max-w-7xl mx-auto space-y-8">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">
+          <h1 className="text-3xl font-extrabold text-white tracking-tight heading-brutal">
             Calendar
           </h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-white/35 mt-2">
             Plan and visualize your content schedule
           </p>
         </div>
         <Button
           onClick={() => setShowAddForm(!showAddForm)}
-          className="bg-blue-600 hover:bg-blue-700 text-white self-start"
+          className="bg-[#00ff88] hover:bg-[#00cc6a] text-[#050505] font-semibold self-start transition-all duration-200 glow-sm hover:scale-[1.02]"
         >
           <Plus className="h-4 w-4 mr-2" />
           Add Event
@@ -156,60 +154,58 @@ export default function CalendarPage() {
 
       {/* Add Event Form */}
       {showAddForm && (
-        <Card className="bg-gray-900/50 border-blue-500/20">
-          <CardContent className="p-5">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-semibold text-white">New Event</h3>
-              <button
-                onClick={() => setShowAddForm(false)}
-                className="text-gray-600 hover:text-white transition-colors"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-              <Input
-                placeholder="Event title"
-                value={newEvent.title}
-                onChange={(e) =>
-                  setNewEvent({ ...newEvent, title: e.target.value })
-                }
-                className="bg-white/[0.05] border-white/[0.08] text-white placeholder:text-gray-600"
-              />
-              <Input
-                type="date"
-                value={newEvent.event_date}
-                onChange={(e) =>
-                  setNewEvent({ ...newEvent, event_date: e.target.value })
-                }
-                className="bg-white/[0.05] border-white/[0.08] text-white"
-              />
-              <select
-                value={newEvent.effort_level}
-                onChange={(e) =>
-                  setNewEvent({ ...newEvent, effort_level: e.target.value })
-                }
-                className="rounded-lg bg-white/[0.05] border border-white/[0.08] px-3 py-2 text-sm text-white outline-none"
-              >
-                <option value="low">Low Effort</option>
-                <option value="medium">Medium Effort</option>
-                <option value="high">High Effort</option>
-              </select>
-              <Button
-                onClick={addEvent}
-                className="bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                Add
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="glass p-5 border-[#00ff88]/15">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-semibold text-white heading-brutal">New Event</h3>
+            <button
+              onClick={() => setShowAddForm(false)}
+              className="text-white/25 hover:text-white/60 transition-colors"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <Input
+              placeholder="Event title"
+              value={newEvent.title}
+              onChange={(e) =>
+                setNewEvent({ ...newEvent, title: e.target.value })
+              }
+              className="glass-input"
+            />
+            <Input
+              type="date"
+              value={newEvent.event_date}
+              onChange={(e) =>
+                setNewEvent({ ...newEvent, event_date: e.target.value })
+              }
+              className="glass-input"
+            />
+            <select
+              value={newEvent.effort_level}
+              onChange={(e) =>
+                setNewEvent({ ...newEvent, effort_level: e.target.value })
+              }
+              className="rounded-xl glass-select px-3 py-2 text-sm"
+            >
+              <option value="low">Low Effort</option>
+              <option value="medium">Medium Effort</option>
+              <option value="high">High Effort</option>
+            </select>
+            <Button
+              onClick={addEvent}
+              className="bg-[#00ff88] hover:bg-[#00cc6a] text-[#050505] font-semibold transition-all duration-200"
+            >
+              Add
+            </Button>
+          </div>
+        </div>
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Calendar Grid */}
-        <Card className="lg:col-span-2 bg-gray-900/50 border-white/[0.06]">
-          <CardHeader className="border-b border-white/[0.06] pb-4">
+        <div className="lg:col-span-2 glass overflow-hidden">
+          <div className="px-5 py-4 border-b border-white/[0.06]">
             <div className="flex items-center justify-between">
               <button
                 onClick={() =>
@@ -217,23 +213,23 @@ export default function CalendarPage() {
                     ? (setYear((y) => y - 1), setViewMonth(11))
                     : setViewMonth((m) => m - 1)
                 }
-                className="p-2 rounded-lg hover:bg-white/[0.06] transition-colors text-gray-400 hover:text-white"
+                className="p-2 rounded-lg hover:bg-white/[0.06] transition-colors text-white/30 hover:text-white"
               >
                 <ChevronLeft className="h-4 w-4" />
               </button>
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => setYear((y) => y - 1)}
-                  className="text-gray-500 hover:text-white text-xs transition-colors"
+                  className="text-white/25 hover:text-white/60 text-xs transition-colors font-mono"
                 >
                   ← {year - 1}
                 </button>
-                <h2 className="text-lg font-semibold text-white">
+                <h2 className="text-lg font-bold text-white heading-brutal">
                   {MONTHS[viewMonth]} {year}
                 </h2>
                 <button
                   onClick={() => setYear((y) => y + 1)}
-                  className="text-gray-500 hover:text-white text-xs transition-colors"
+                  className="text-white/25 hover:text-white/60 text-xs transition-colors font-mono"
                 >
                   {year + 1} →
                 </button>
@@ -244,19 +240,19 @@ export default function CalendarPage() {
                     ? (setYear((y) => y + 1), setViewMonth(0))
                     : setViewMonth((m) => m + 1)
                 }
-                className="p-2 rounded-lg hover:bg-white/[0.06] transition-colors text-gray-400 hover:text-white"
+                className="p-2 rounded-lg hover:bg-white/[0.06] transition-colors text-white/30 hover:text-white"
               >
                 <ChevronRight className="h-4 w-4" />
               </button>
             </div>
-          </CardHeader>
-          <CardContent className="p-4">
+          </div>
+          <div className="p-4">
             {/* Weekday headers */}
             <div className="grid grid-cols-7 mb-2">
               {WEEKDAYS.map((day) => (
                 <div
                   key={day}
-                  className="text-center text-xs font-medium text-gray-600 py-2"
+                  className="text-center text-[10px] font-medium text-white/25 py-2 font-mono uppercase tracking-wider"
                 >
                   {day}
                 </div>
@@ -279,21 +275,21 @@ export default function CalendarPage() {
                   <button
                     key={day}
                     onClick={() => setSelectedDate(dateStr)}
-                    className={`aspect-square rounded-lg p-1.5 flex flex-col items-center justify-start gap-0.5 transition-all duration-200 relative ${
+                    className={`aspect-square rounded-xl p-1.5 flex flex-col items-center justify-start gap-0.5 transition-all duration-200 relative ${
                       isSelected
-                        ? "bg-blue-600/20 ring-1 ring-blue-500/40"
+                        ? "bg-[#00ff88]/10 border border-[#00ff88]/25 shadow-[0_0_12px_rgba(0,255,136,0.06)]"
                         : isToday
-                          ? "bg-white/[0.06]"
-                          : "hover:bg-white/[0.04]"
+                          ? "bg-white/[0.06] border border-white/[0.08]"
+                          : "hover:bg-white/[0.04] border border-transparent"
                     }`}
                   >
                     <span
                       className={`text-xs font-medium ${
                         isToday
-                          ? "text-blue-400"
+                          ? "text-[#00ff88]"
                           : isSelected
                             ? "text-white"
-                            : "text-gray-400"
+                            : "text-white/40"
                       }`}
                     >
                       {day}
@@ -304,7 +300,7 @@ export default function CalendarPage() {
                           <div
                             key={j}
                             className={`h-1 w-1 rounded-full ${
-                              effortDotColors[ev.effort_level] || "bg-gray-500"
+                              effortDotColors[ev.effort_level] || "bg-white/20"
                             }`}
                           />
                         ))}
@@ -314,107 +310,99 @@ export default function CalendarPage() {
                 );
               })}
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Day Detail / Legend */}
         <div className="space-y-4">
-          <Card className="bg-gray-900/50 border-white/[0.06]">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-semibold text-white flex items-center gap-2">
-                <CalendarIcon className="h-4 w-4 text-gray-500" />
-                {selectedDate
-                  ? new Date(selectedDate + "T00:00:00").toLocaleDateString(
-                      "en-US",
-                      {
-                        weekday: "long",
-                        month: "long",
-                        day: "numeric",
-                      }
-                    )
-                  : "Select a day"}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
+          <div className="glass p-5">
+            <h3 className="text-sm font-semibold text-white flex items-center gap-2 heading-brutal mb-3">
+              <CalendarIcon className="h-4 w-4 text-white/25" />
+              {selectedDate
+                ? new Date(selectedDate + "T00:00:00").toLocaleDateString(
+                    "en-US",
+                    {
+                      weekday: "long",
+                      month: "long",
+                      day: "numeric",
+                    }
+                  )
+                : "Select a day"}
+            </h3>
+            <div>
               {selectedDate ? (
                 selectedDayEvents.length > 0 ? (
                   <div className="space-y-2">
                     {selectedDayEvents.map((event) => (
                       <div
                         key={event.id}
-                        className={`rounded-lg border p-3 ${
+                        className={`rounded-xl border p-3 ${
                           effortColors[event.effort_level] ||
-                          "bg-gray-500/10 border-gray-500/20 text-gray-400"
+                          "bg-white/[0.04] border-white/[0.08] text-white/40"
                         }`}
                       >
                         <p className="text-sm font-medium">{event.title}</p>
-                        <p className="text-xs opacity-70 capitalize">
+                        <p className="text-xs opacity-60 capitalize font-mono">
                           {event.event_type} · {event.effort_level} effort
                         </p>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-sm text-gray-600 text-center py-4">
+                  <p className="text-sm text-white/20 text-center py-4">
                     No events on this day
                   </p>
                 )
               ) : (
-                <p className="text-sm text-gray-600 text-center py-4">
+                <p className="text-sm text-white/20 text-center py-4">
                   Click on a day to see events
                 </p>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
           {/* Legend */}
-          <Card className="bg-gray-900/50 border-white/[0.06]">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-semibold text-white">
-                Effort Level
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
+          <div className="glass p-5">
+            <h3 className="text-sm font-semibold text-white mb-3 heading-brutal">
+              Effort Level
+            </h3>
+            <div className="space-y-2.5">
               <div className="flex items-center gap-3">
-                <div className="h-2.5 w-2.5 rounded-full bg-green-400" />
-                <span className="text-sm text-gray-400">Low</span>
+                <div className="h-2.5 w-2.5 rounded-full bg-[#00ff88] shadow-[0_0_8px_rgba(0,255,136,0.3)]" />
+                <span className="text-sm text-white/40">Low</span>
               </div>
               <div className="flex items-center gap-3">
-                <div className="h-2.5 w-2.5 rounded-full bg-yellow-400" />
-                <span className="text-sm text-gray-400">Medium</span>
+                <div className="h-2.5 w-2.5 rounded-full bg-[#ffaa00] shadow-[0_0_8px_rgba(255,170,0,0.3)]" />
+                <span className="text-sm text-white/40">Medium</span>
               </div>
               <div className="flex items-center gap-3">
-                <div className="h-2.5 w-2.5 rounded-full bg-red-400" />
-                <span className="text-sm text-gray-400">High</span>
+                <div className="h-2.5 w-2.5 rounded-full bg-[#ff3366] shadow-[0_0_8px_rgba(255,51,102,0.3)]" />
+                <span className="text-sm text-white/40">High</span>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
           {/* Month Quick Nav */}
-          <Card className="bg-gray-900/50 border-white/[0.06]">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-semibold text-white">
-                Quick Nav
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-4 gap-1.5">
-                {MONTHS.map((m, i) => (
-                  <button
-                    key={m}
-                    onClick={() => setViewMonth(i)}
-                    className={`rounded-md px-2 py-1.5 text-[10px] font-medium transition-all ${
-                      i === viewMonth
-                        ? "bg-blue-600/20 text-blue-400"
-                        : "text-gray-600 hover:text-gray-300 hover:bg-white/[0.04]"
-                    }`}
-                  >
-                    {m.slice(0, 3)}
-                  </button>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+          <div className="glass p-5">
+            <h3 className="text-sm font-semibold text-white mb-3 heading-brutal">
+              Quick Nav
+            </h3>
+            <div className="grid grid-cols-4 gap-1.5">
+              {MONTHS.map((m, i) => (
+                <button
+                  key={m}
+                  onClick={() => setViewMonth(i)}
+                  className={`rounded-lg px-2 py-1.5 text-[10px] font-medium transition-all duration-200 font-mono ${
+                    i === viewMonth
+                      ? "bg-[#00ff88]/10 text-[#00ff88] border border-[#00ff88]/20"
+                      : "text-white/25 hover:text-white/50 hover:bg-white/[0.04] border border-transparent"
+                  }`}
+                >
+                  {m.slice(0, 3)}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </div>

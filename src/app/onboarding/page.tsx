@@ -24,10 +24,8 @@ import {
   Video,
   Briefcase,
 } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
 
 const STEPS = [
   { title: "Brand Basics", icon: Building2 },
@@ -153,36 +151,48 @@ export default function OnboardingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-950 flex flex-col items-center justify-center p-4 sm:p-6">
+    <div className="min-h-screen bg-[#050505] grid-bg flex flex-col items-center justify-center p-4 sm:p-6">
       <div className="w-full max-w-2xl">
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 text-white font-bold">
+        <div className="text-center mb-10">
+          <div className="flex items-center justify-center gap-3 mb-5">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#00ff88]/10 border border-[#00ff88]/20 text-[#00ff88] font-bold shadow-[0_0_20px_rgba(0,255,136,0.1)]">
               T
             </div>
-            <span className="text-lg font-bold text-white">TACT</span>
+            <span className="text-lg font-bold text-white heading-brutal">TACT</span>
           </div>
-          <h1 className="text-2xl font-bold text-white mb-1">
+          <h1 className="text-2xl font-extrabold text-white mb-2 heading-brutal">
             Set up your brand
           </h1>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-white/35">
             Tell us about your brand to get personalized content
           </p>
         </div>
 
         {/* Progress */}
-        <div className="mb-8">
+        <div className="mb-10">
+          {/* Progress bar */}
+          <div className="h-1 bg-white/[0.06] rounded-full mb-6 overflow-hidden">
+            <div
+              className="h-full bg-[#00ff88] rounded-full transition-all duration-500 ease-out"
+              style={{
+                width: `${((step + 1) / STEPS.length) * 100}%`,
+                boxShadow: "0 0 12px rgba(0,255,136,0.3)",
+              }}
+            />
+          </div>
+
+          {/* Step indicators */}
           <div className="flex items-center justify-between mb-3">
             {STEPS.map((s, i) => (
               <div key={s.title} className="flex items-center">
                 <div
-                  className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold transition-all duration-300 ${
+                  className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold transition-all duration-300 font-mono ${
                     i < step
-                      ? "bg-blue-600 text-white"
+                      ? "bg-[#00ff88] text-[#050505] shadow-[0_0_12px_rgba(0,255,136,0.2)]"
                       : i === step
-                        ? "bg-blue-600/20 text-blue-400 border border-blue-500/30"
-                        : "bg-white/[0.05] text-gray-600"
+                        ? "bg-[#00ff88]/10 text-[#00ff88] border border-[#00ff88]/30 shadow-[0_0_12px_rgba(0,255,136,0.08)]"
+                        : "bg-white/[0.04] text-white/20 border border-white/[0.06]"
                   }`}
                 >
                   {i < step ? (
@@ -194,7 +204,7 @@ export default function OnboardingPage() {
                 {i < STEPS.length - 1 && (
                   <div
                     className={`hidden sm:block w-8 lg:w-16 h-px mx-1 transition-colors duration-300 ${
-                      i < step ? "bg-blue-600" : "bg-white/[0.08]"
+                      i < step ? "bg-[#00ff88]/50" : "bg-white/[0.06]"
                     }`}
                   />
                 )}
@@ -202,329 +212,327 @@ export default function OnboardingPage() {
             ))}
           </div>
           <div className="flex justify-between">
-            <span className="text-xs text-gray-600 font-medium">
+            <span className="text-xs text-white/25 font-medium font-mono">
               Step {step + 1} of {STEPS.length}
             </span>
-            <span className="text-xs text-gray-600 font-medium">
+            <span className="text-xs text-white/25 font-medium font-mono">
               {STEPS[step].title}
             </span>
           </div>
         </div>
 
         {/* Step content */}
-        <Card className="bg-gray-900/50 border-white/[0.06]">
-          <CardContent className="p-6 sm:p-8">
-            {/* Step 0: Brand Basics */}
-            {step === 0 && (
-              <div className="space-y-6">
-                <div>
-                  <h2 className="text-lg font-semibold text-white mb-1">
-                    Brand Basics
-                  </h2>
-                  <p className="text-sm text-gray-500">
-                    Start with your brand&apos;s core information
-                  </p>
-                </div>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Brand Name *
-                    </label>
-                    <Input
-                      placeholder="e.g., HUEHUE"
-                      value={form.name}
-                      onChange={(e) => {
-                        updateForm({
-                          name: e.target.value,
-                          slug: generateSlug(e.target.value),
-                        });
-                      }}
-                      className="bg-white/[0.05] border-white/[0.08] text-white placeholder:text-gray-600 focus:border-blue-500/50 focus:ring-blue-500/20"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      URL Slug
-                    </label>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-gray-600">tact.app/</span>
-                      <Input
-                        placeholder="huehue"
-                        value={form.slug}
-                        onChange={(e) => updateForm({ slug: e.target.value })}
-                        className="bg-white/[0.05] border-white/[0.08] text-white placeholder:text-gray-600 focus:border-blue-500/50 focus:ring-blue-500/20"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Industry *
-                    </label>
-                    <Input
-                      placeholder="e.g., Pet Accessories"
-                      value={form.industry}
-                      onChange={(e) => updateForm({ industry: e.target.value })}
-                      className="bg-white/[0.05] border-white/[0.08] text-white placeholder:text-gray-600 focus:border-blue-500/50 focus:ring-blue-500/20"
-                    />
-                  </div>
-                </div>
+        <div className="glass p-6 sm:p-8">
+          {/* Step 0: Brand Basics */}
+          {step === 0 && (
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-lg font-bold text-white mb-1 heading-brutal">
+                  Brand Basics
+                </h2>
+                <p className="text-sm text-white/35">
+                  Start with your brand&apos;s core information
+                </p>
               </div>
-            )}
-
-            {/* Step 1: Tone of Voice */}
-            {step === 1 && (
-              <div className="space-y-6">
+              <div className="space-y-4">
                 <div>
-                  <h2 className="text-lg font-semibold text-white mb-1">
-                    Tone of Voice
-                  </h2>
-                  <p className="text-sm text-gray-500">
-                    How should your brand sound?
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Describe your brand&apos;s voice *
+                  <label className="block text-xs font-medium text-white/40 mb-2 font-mono uppercase tracking-wider">
+                    Brand Name *
                   </label>
-                  <textarea
-                    rows={4}
-                    placeholder="e.g., Friendly and playful, using humor and emojis. We speak to pet parents like friends, sharing tips and heartwarming moments..."
-                    value={form.toneOfVoice}
-                    onChange={(e) =>
-                      updateForm({ toneOfVoice: e.target.value })
-                    }
-                    className="w-full rounded-lg bg-white/[0.05] border border-white/[0.08] px-4 py-3 text-sm text-white placeholder:text-gray-600 focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/20 outline-none resize-none transition-colors"
+                  <Input
+                    placeholder="e.g., HUEHUE"
+                    value={form.name}
+                    onChange={(e) => {
+                      updateForm({
+                        name: e.target.value,
+                        slug: generateSlug(e.target.value),
+                      });
+                    }}
+                    className="glass-input"
                   />
                 </div>
                 <div>
-                  <p className="text-xs text-gray-600 mb-3 font-medium uppercase tracking-wider">
-                    Quick presets
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {[
-                      "Professional",
-                      "Friendly",
-                      "Playful",
-                      "Inspirational",
-                      "Witty",
-                      "Authoritative",
-                      "Casual",
-                      "Luxurious",
-                    ].map((preset) => (
-                      <button
-                        key={preset}
-                        onClick={() =>
-                          updateForm({
-                            toneOfVoice: form.toneOfVoice
-                              ? form.toneOfVoice + ", " + preset.toLowerCase()
-                              : preset.toLowerCase(),
-                          })
-                        }
-                        className="rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-1.5 text-xs font-medium text-gray-400 hover:text-white hover:border-white/[0.15] hover:bg-white/[0.06] transition-all"
-                      >
-                        {preset}
-                      </button>
-                    ))}
+                  <label className="block text-xs font-medium text-white/40 mb-2 font-mono uppercase tracking-wider">
+                    URL Slug
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-white/25 font-mono">tact.app/</span>
+                    <Input
+                      placeholder="huehue"
+                      value={form.slug}
+                      onChange={(e) => updateForm({ slug: e.target.value })}
+                      className="glass-input"
+                    />
                   </div>
                 </div>
-              </div>
-            )}
-
-            {/* Step 2: Markets */}
-            {step === 2 && (
-              <div className="space-y-6">
                 <div>
-                  <h2 className="text-lg font-semibold text-white mb-1">
-                    Target Markets
-                  </h2>
-                  <p className="text-sm text-gray-500">
-                    Where do your customers live?
-                  </p>
+                  <label className="block text-xs font-medium text-white/40 mb-2 font-mono uppercase tracking-wider">
+                    Industry *
+                  </label>
+                  <Input
+                    placeholder="e.g., Pet Accessories"
+                    value={form.industry}
+                    onChange={(e) => updateForm({ industry: e.target.value })}
+                    className="glass-input"
+                  />
                 </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                  {COUNTRIES.map((country) => (
+              </div>
+            </div>
+          )}
+
+          {/* Step 1: Tone of Voice */}
+          {step === 1 && (
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-lg font-bold text-white mb-1 heading-brutal">
+                  Tone of Voice
+                </h2>
+                <p className="text-sm text-white/35">
+                  How should your brand sound?
+                </p>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-white/40 mb-2 font-mono uppercase tracking-wider">
+                  Describe your brand&apos;s voice *
+                </label>
+                <textarea
+                  rows={4}
+                  placeholder="e.g., Friendly and playful, using humor and emojis. We speak to pet parents like friends, sharing tips and heartwarming moments..."
+                  value={form.toneOfVoice}
+                  onChange={(e) =>
+                    updateForm({ toneOfVoice: e.target.value })
+                  }
+                  className="w-full rounded-xl glass-input px-4 py-3 text-sm outline-none resize-none"
+                />
+              </div>
+              <div>
+                <p className="text-[10px] text-white/25 mb-3 font-mono uppercase tracking-[0.15em] font-semibold">
+                  Quick presets
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    "Professional",
+                    "Friendly",
+                    "Playful",
+                    "Inspirational",
+                    "Witty",
+                    "Authoritative",
+                    "Casual",
+                    "Luxurious",
+                  ].map((preset) => (
                     <button
-                      key={country}
-                      onClick={() => toggleArrayItem("markets", country)}
-                      className={`rounded-lg border px-4 py-3 text-sm font-medium transition-all duration-200 ${
-                        form.markets.includes(country)
-                          ? "bg-blue-600/15 border-blue-500/30 text-blue-400"
-                          : "bg-white/[0.03] border-white/[0.06] text-gray-400 hover:text-white hover:border-white/[0.12]"
-                      }`}
+                      key={preset}
+                      onClick={() =>
+                        updateForm({
+                          toneOfVoice: form.toneOfVoice
+                            ? form.toneOfVoice + ", " + preset.toLowerCase()
+                            : preset.toLowerCase(),
+                        })
+                      }
+                      className="rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-1.5 text-xs font-medium text-white/40 hover:text-[#00ff88] hover:border-[#00ff88]/20 hover:bg-[#00ff88]/5 transition-all duration-200"
                     >
-                      {country}
+                      {preset}
                     </button>
                   ))}
                 </div>
-                {form.markets.length > 0 && (
-                  <p className="text-xs text-gray-600">
-                    {form.markets.length} market
-                    {form.markets.length !== 1 ? "s" : ""} selected
-                  </p>
-                )}
               </div>
-            )}
+            </div>
+          )}
 
-            {/* Step 3: Platforms */}
-            {step === 3 && (
-              <div className="space-y-6">
-                <div>
-                  <h2 className="text-lg font-semibold text-white mb-1">
-                    Platforms
-                  </h2>
-                  <p className="text-sm text-gray-500">
-                    Where will you publish content?
-                  </p>
-                </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  {PLATFORMS.map((platform) => (
+          {/* Step 2: Markets */}
+          {step === 2 && (
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-lg font-bold text-white mb-1 heading-brutal">
+                  Target Markets
+                </h2>
+                <p className="text-sm text-white/35">
+                  Where do your customers live?
+                </p>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {COUNTRIES.map((country) => (
+                  <button
+                    key={country}
+                    onClick={() => toggleArrayItem("markets", country)}
+                    className={`rounded-xl border px-4 py-3 text-sm font-medium transition-all duration-200 ${
+                      form.markets.includes(country)
+                        ? "bg-[#00ff88]/10 border-[#00ff88]/25 text-[#00ff88]"
+                        : "bg-white/[0.03] border-white/[0.06] text-white/40 hover:text-white hover:border-white/[0.12]"
+                    }`}
+                  >
+                    {country}
+                  </button>
+                ))}
+              </div>
+              {form.markets.length > 0 && (
+                <p className="text-xs text-white/25 font-mono">
+                  {form.markets.length} market
+                  {form.markets.length !== 1 ? "s" : ""} selected
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* Step 3: Platforms */}
+          {step === 3 && (
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-lg font-bold text-white mb-1 heading-brutal">
+                  Platforms
+                </h2>
+                <p className="text-sm text-white/35">
+                  Where will you publish content?
+                </p>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {PLATFORMS.map((platform) => (
+                  <button
+                    key={platform.id}
+                    onClick={() =>
+                      toggleArrayItem("platforms", platform.id)
+                    }
+                    className={`flex flex-col items-center gap-3 rounded-xl border p-5 transition-all duration-200 ${
+                      form.platforms.includes(platform.id)
+                        ? "bg-[#00ff88]/10 border-[#00ff88]/25 text-[#00ff88]"
+                        : "bg-white/[0.03] border-white/[0.06] text-white/40 hover:text-white hover:border-white/[0.12]"
+                    }`}
+                  >
+                    <platform.icon className="h-6 w-6" />
+                    <span className="text-sm font-medium">
+                      {platform.label}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Step 4: Content Verticals */}
+          {step === 4 && (
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-lg font-bold text-white mb-1 heading-brutal">
+                  Content Verticals
+                </h2>
+                <p className="text-sm text-white/35">
+                  What types of content will you create?
+                </p>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {VERTICALS.map((vertical) => {
+                  const colorMap: Record<string, string> = {
+                    blue: "bg-[#00ff88]/10 border-[#00ff88]/25 text-[#00ff88]",
+                    yellow:
+                      "bg-[#ffaa00]/10 border-[#ffaa00]/25 text-[#ffaa00]",
+                    purple:
+                      "bg-purple-500/10 border-purple-500/25 text-purple-400",
+                    green:
+                      "bg-[#00cc6a]/10 border-[#00cc6a]/25 text-[#00cc6a]",
+                    red: "bg-[#ff3366]/10 border-[#ff3366]/25 text-[#ff3366]",
+                    pink: "bg-pink-500/10 border-pink-500/25 text-pink-400",
+                  };
+                  const isActive = form.contentVerticals.includes(vertical.id);
+                  return (
                     <button
-                      key={platform.id}
+                      key={vertical.id}
                       onClick={() =>
-                        toggleArrayItem("platforms", platform.id)
+                        toggleArrayItem("contentVerticals", vertical.id)
                       }
                       className={`flex flex-col items-center gap-3 rounded-xl border p-5 transition-all duration-200 ${
-                        form.platforms.includes(platform.id)
-                          ? "bg-blue-600/15 border-blue-500/30 text-blue-400"
-                          : "bg-white/[0.03] border-white/[0.06] text-gray-400 hover:text-white hover:border-white/[0.12]"
+                        isActive
+                          ? colorMap[vertical.color]
+                          : "bg-white/[0.03] border-white/[0.06] text-white/40 hover:text-white hover:border-white/[0.12]"
                       }`}
                     >
-                      <platform.icon className="h-6 w-6" />
+                      <vertical.icon className="h-6 w-6" />
                       <span className="text-sm font-medium">
-                        {platform.label}
+                        {vertical.label}
                       </span>
                     </button>
-                  ))}
-                </div>
+                  );
+                })}
               </div>
-            )}
+            </div>
+          )}
 
-            {/* Step 4: Content Verticals */}
-            {step === 4 && (
-              <div className="space-y-6">
-                <div>
-                  <h2 className="text-lg font-semibold text-white mb-1">
-                    Content Verticals
-                  </h2>
-                  <p className="text-sm text-gray-500">
-                    What types of content will you create?
+          {/* Step 5: Review */}
+          {step === 5 && (
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-lg font-bold text-white mb-1 heading-brutal">
+                  Review & Submit
+                </h2>
+                <p className="text-sm text-white/35">
+                  Check everything looks good
+                </p>
+              </div>
+              <div className="space-y-4">
+                <ReviewSection title="Brand">
+                  <p className="text-white font-medium">
+                    {form.name || "—"}
                   </p>
-                </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  {VERTICALS.map((vertical) => {
-                    const colorMap: Record<string, string> = {
-                      blue: "bg-blue-600/15 border-blue-500/30 text-blue-400",
-                      yellow:
-                        "bg-yellow-600/15 border-yellow-500/30 text-yellow-400",
-                      purple:
-                        "bg-purple-600/15 border-purple-500/30 text-purple-400",
-                      green:
-                        "bg-green-600/15 border-green-500/30 text-green-400",
-                      red: "bg-red-600/15 border-red-500/30 text-red-400",
-                      pink: "bg-pink-600/15 border-pink-500/30 text-pink-400",
-                    };
-                    const isActive = form.contentVerticals.includes(vertical.id);
-                    return (
-                      <button
-                        key={vertical.id}
-                        onClick={() =>
-                          toggleArrayItem("contentVerticals", vertical.id)
-                        }
-                        className={`flex flex-col items-center gap-3 rounded-xl border p-5 transition-all duration-200 ${
-                          isActive
-                            ? colorMap[vertical.color]
-                            : "bg-white/[0.03] border-white/[0.06] text-gray-400 hover:text-white hover:border-white/[0.12]"
-                        }`}
+                  <p className="text-sm text-white/35">
+                    {form.industry} · {form.slug || generateSlug(form.name)}
+                  </p>
+                </ReviewSection>
+                <div className="h-px bg-white/[0.06]" />
+                <ReviewSection title="Tone of Voice">
+                  <p className="text-sm text-white/60">
+                    {form.toneOfVoice || "—"}
+                  </p>
+                </ReviewSection>
+                <div className="h-px bg-white/[0.06]" />
+                <ReviewSection title="Markets">
+                  <div className="flex flex-wrap gap-1.5">
+                    {form.markets.map((m) => (
+                      <span
+                        key={m}
+                        className="rounded-md bg-white/[0.06] border border-white/[0.08] px-2 py-1 text-xs text-white/40 font-mono"
                       >
-                        <vertical.icon className="h-6 w-6" />
-                        <span className="text-sm font-medium">
-                          {vertical.label}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
+                        {m}
+                      </span>
+                    ))}
+                  </div>
+                </ReviewSection>
+                <div className="h-px bg-white/[0.06]" />
+                <ReviewSection title="Platforms">
+                  <div className="flex flex-wrap gap-1.5">
+                    {form.platforms.map((p) => (
+                      <span
+                        key={p}
+                        className="rounded-md bg-[#00ff88]/8 border border-[#00ff88]/12 px-2 py-1 text-xs text-[#00ff88] capitalize font-mono"
+                      >
+                        {p}
+                      </span>
+                    ))}
+                  </div>
+                </ReviewSection>
+                <div className="h-px bg-white/[0.06]" />
+                <ReviewSection title="Content Verticals">
+                  <div className="flex flex-wrap gap-1.5">
+                    {form.contentVerticals.map((v) => (
+                      <span
+                        key={v}
+                        className="rounded-md bg-purple-500/8 border border-purple-500/12 px-2 py-1 text-xs text-purple-400 capitalize font-mono"
+                      >
+                        {v}
+                      </span>
+                    ))}
+                  </div>
+                </ReviewSection>
               </div>
-            )}
-
-            {/* Step 5: Review */}
-            {step === 5 && (
-              <div className="space-y-6">
-                <div>
-                  <h2 className="text-lg font-semibold text-white mb-1">
-                    Review & Submit
-                  </h2>
-                  <p className="text-sm text-gray-500">
-                    Check everything looks good
-                  </p>
-                </div>
-                <div className="space-y-4">
-                  <ReviewSection title="Brand">
-                    <p className="text-white font-medium">
-                      {form.name || "—"}
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      {form.industry} · {form.slug || generateSlug(form.name)}
-                    </p>
-                  </ReviewSection>
-                  <Separator className="bg-white/[0.06]" />
-                  <ReviewSection title="Tone of Voice">
-                    <p className="text-sm text-gray-300">
-                      {form.toneOfVoice || "—"}
-                    </p>
-                  </ReviewSection>
-                  <Separator className="bg-white/[0.06]" />
-                  <ReviewSection title="Markets">
-                    <div className="flex flex-wrap gap-1.5">
-                      {form.markets.map((m) => (
-                        <span
-                          key={m}
-                          className="rounded-md bg-white/[0.06] px-2 py-1 text-xs text-gray-400"
-                        >
-                          {m}
-                        </span>
-                      ))}
-                    </div>
-                  </ReviewSection>
-                  <Separator className="bg-white/[0.06]" />
-                  <ReviewSection title="Platforms">
-                    <div className="flex flex-wrap gap-1.5">
-                      {form.platforms.map((p) => (
-                        <span
-                          key={p}
-                          className="rounded-md bg-blue-500/10 px-2 py-1 text-xs text-blue-400 capitalize"
-                        >
-                          {p}
-                        </span>
-                      ))}
-                    </div>
-                  </ReviewSection>
-                  <Separator className="bg-white/[0.06]" />
-                  <ReviewSection title="Content Verticals">
-                    <div className="flex flex-wrap gap-1.5">
-                      {form.contentVerticals.map((v) => (
-                        <span
-                          key={v}
-                          className="rounded-md bg-purple-500/10 px-2 py-1 text-xs text-purple-400 capitalize"
-                        >
-                          {v}
-                        </span>
-                      ))}
-                    </div>
-                  </ReviewSection>
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+            </div>
+          )}
+        </div>
 
         {/* Navigation */}
-        <div className="flex items-center justify-between mt-6">
+        <div className="flex items-center justify-between mt-8">
           <Button
             variant="ghost"
             onClick={() => setStep((s) => s - 1)}
             disabled={step === 0}
-            className="text-gray-500 hover:text-white disabled:opacity-30"
+            className="text-white/30 hover:text-white/60 disabled:opacity-20 transition-all duration-200"
           >
             <ChevronLeft className="h-4 w-4 mr-1" />
             Back
@@ -533,7 +541,7 @@ export default function OnboardingPage() {
             <Button
               onClick={() => setStep((s) => s + 1)}
               disabled={!canProceed()}
-              className="bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-30 disabled:cursor-not-allowed"
+              className="bg-[#00ff88] hover:bg-[#00cc6a] text-[#050505] font-semibold disabled:opacity-20 disabled:cursor-not-allowed transition-all duration-200 glow-sm hover:scale-[1.02]"
             >
               Continue
               <ChevronRight className="h-4 w-4 ml-1" />
@@ -542,7 +550,7 @@ export default function OnboardingPage() {
             <Button
               onClick={handleSubmit}
               disabled={submitting}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
+              className="bg-[#00ff88] hover:bg-[#00cc6a] text-[#050505] font-semibold transition-all duration-200 glow-sm hover:scale-[1.02]"
             >
               {submitting ? (
                 "Setting up..."
@@ -569,7 +577,7 @@ function ReviewSection({
 }) {
   return (
     <div>
-      <p className="text-xs font-medium text-gray-600 uppercase tracking-wider mb-2">
+      <p className="text-[10px] font-medium text-white/25 uppercase tracking-[0.15em] mb-2 font-mono">
         {title}
       </p>
       {children}

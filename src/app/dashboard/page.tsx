@@ -13,7 +13,6 @@ import {
   TrendingUp,
   BarChart3,
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -37,11 +36,11 @@ interface ContentPiece {
 }
 
 const statusColors: Record<string, string> = {
-  planned: "bg-blue-500/15 text-blue-400 border-blue-500/20",
-  drafting: "bg-yellow-500/15 text-yellow-400 border-yellow-500/20",
-  review: "bg-orange-500/15 text-orange-400 border-orange-500/20",
-  approved: "bg-green-500/15 text-green-400 border-green-500/20",
-  published: "bg-purple-500/15 text-purple-400 border-purple-500/20",
+  planned: "bg-[#00ff88]/10 text-[#00ff88] border-[#00ff88]/15",
+  drafting: "bg-[#ffaa00]/10 text-[#ffaa00] border-[#ffaa00]/15",
+  review: "bg-[#ff8844]/10 text-[#ff8844] border-[#ff8844]/15",
+  approved: "bg-[#00cc6a]/10 text-[#00cc6a] border-[#00cc6a]/15",
+  published: "bg-white/5 text-white/60 border-white/10",
 };
 
 export default function DashboardPage() {
@@ -94,44 +93,32 @@ export default function DashboardPage() {
       title: "Total Content",
       value: stats.total,
       icon: FileText,
-      color: "text-blue-400",
-      bg: "bg-blue-500/10",
-      border: "border-blue-500/20",
     },
     {
       title: "Published",
       value: stats.published,
       icon: Globe,
-      color: "text-green-400",
-      bg: "bg-green-500/10",
-      border: "border-green-500/20",
     },
     {
       title: "Scheduled",
       value: stats.scheduled,
       icon: Clock,
-      color: "text-blue-400",
-      bg: "bg-blue-500/10",
-      border: "border-blue-500/20",
     },
     {
       title: "Drafts",
       value: stats.drafts,
       icon: PenLine,
-      color: "text-yellow-400",
-      bg: "bg-yellow-500/10",
-      border: "border-yellow-500/20",
     },
   ];
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-8">
+    <div className="p-6 sm:p-8 lg:p-10 max-w-7xl mx-auto space-y-10">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-white tracking-tight">
+        <h1 className="text-3xl font-extrabold text-white tracking-tight heading-brutal">
           Dashboard
         </h1>
-        <p className="text-sm text-gray-500 mt-1">
+        <p className="text-sm text-white/35 mt-2">
           Welcome back. Here&apos;s your content overview.
         </p>
       </div>
@@ -139,114 +126,106 @@ export default function DashboardPage() {
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {statCards.map((card) => (
-          <Card
+          <div
             key={card.title}
-            className={`bg-gray-900/50 border-white/[0.06] hover:border-white/[0.12] transition-all duration-300 group`}
+            className="glass glass-hover p-5 transition-all duration-200 group"
           >
-            <CardContent className="p-5">
-              <div className="flex items-center justify-between">
-                <div
-                  className={`flex h-10 w-10 items-center justify-center rounded-xl ${card.bg} border ${card.border}`}
-                >
-                  <card.icon className={`h-5 w-5 ${card.color}`} />
-                </div>
-                <TrendingUp className="h-4 w-4 text-gray-600 group-hover:text-gray-400 transition-colors" />
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/[0.04] border border-white/[0.06]">
+                <card.icon className="h-5 w-5 text-white/40 group-hover:text-[#00ff88] transition-colors duration-200" />
               </div>
-              <div className="mt-4">
-                {loading ? (
-                  <Skeleton className="h-8 w-16 bg-white/[0.06]" />
-                ) : (
-                  <p className="text-3xl font-bold text-white">{card.value}</p>
-                )}
-                <p className="text-xs text-gray-500 mt-1 font-medium">
-                  {card.title}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+              <TrendingUp className="h-4 w-4 text-white/15 group-hover:text-white/30 transition-colors duration-200" />
+            </div>
+            <div>
+              {loading ? (
+                <Skeleton className="h-9 w-16 bg-white/[0.04]" />
+              ) : (
+                <p className="text-3xl font-extrabold stat-number">{card.value}</p>
+              )}
+              <p className="text-xs text-white/35 mt-1 font-medium font-mono uppercase tracking-wider">
+                {card.title}
+              </p>
+            </div>
+          </div>
         ))}
       </div>
 
       {/* Quick Actions */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Link href="/generate" className="group">
-          <Card className="bg-gradient-to-br from-blue-600/10 to-blue-600/5 border-blue-500/20 hover:border-blue-500/40 transition-all duration-300 cursor-pointer h-full">
-            <CardContent className="p-6 flex items-center gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-600/20">
-                <Sparkles className="h-6 w-6 text-blue-400" />
-              </div>
-              <div className="flex-1">
-                <h3 className="font-semibold text-white group-hover:text-blue-400 transition-colors">
-                  Generate Content
-                </h3>
-                <p className="text-sm text-gray-500">
-                  AI-powered content creation
-                </p>
-              </div>
-              <ArrowUpRight className="h-5 w-5 text-gray-600 group-hover:text-blue-400 transition-all group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-            </CardContent>
-          </Card>
+          <div className="glass glass-hover p-6 flex items-center gap-4 cursor-pointer transition-all duration-200">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#00ff88]/8 border border-[#00ff88]/12">
+              <Sparkles className="h-6 w-6 text-[#00ff88]/70" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-semibold text-white group-hover:text-[#00ff88] transition-colors duration-200 heading-brutal">
+                Generate Content
+              </h3>
+              <p className="text-sm text-white/35 mt-0.5">
+                AI-powered content creation
+              </p>
+            </div>
+            <ArrowUpRight className="h-5 w-5 text-white/20 group-hover:text-[#00ff88] transition-all duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+          </div>
         </Link>
         <Link href="/calendar" className="group">
-          <Card className="bg-gradient-to-br from-purple-600/10 to-purple-600/5 border-purple-500/20 hover:border-purple-500/40 transition-all duration-300 cursor-pointer h-full">
-            <CardContent className="p-6 flex items-center gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-purple-600/20">
-                <Calendar className="h-6 w-6 text-purple-400" />
-              </div>
-              <div className="flex-1">
-                <h3 className="font-semibold text-white group-hover:text-purple-400 transition-colors">
-                  View Calendar
-                </h3>
-                <p className="text-sm text-gray-500">
-                  Plan and schedule content
-                </p>
-              </div>
-              <ArrowUpRight className="h-5 w-5 text-gray-600 group-hover:text-purple-400 transition-all group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-            </CardContent>
-          </Card>
+          <div className="glass glass-hover p-6 flex items-center gap-4 cursor-pointer transition-all duration-200">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#00ff88]/8 border border-[#00ff88]/12">
+              <Calendar className="h-6 w-6 text-[#00ff88]/70" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-semibold text-white group-hover:text-[#00ff88] transition-colors duration-200 heading-brutal">
+                View Calendar
+              </h3>
+              <p className="text-sm text-white/35 mt-0.5">
+                Plan and schedule content
+              </p>
+            </div>
+            <ArrowUpRight className="h-5 w-5 text-white/20 group-hover:text-[#00ff88] transition-all duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+          </div>
         </Link>
       </div>
 
       {/* Recent Content */}
-      <Card className="bg-gray-900/50 border-white/[0.06]">
-        <CardHeader className="border-b border-white/[0.06] pb-4">
+      <div className="glass overflow-hidden">
+        <div className="px-6 py-4 border-b border-white/[0.06]">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <BarChart3 className="h-4 w-4 text-gray-500" />
-              <CardTitle className="text-base font-semibold text-white">
+              <BarChart3 className="h-4 w-4 text-white/25" />
+              <h2 className="text-base font-semibold text-white heading-brutal">
                 Recent Content
-              </CardTitle>
+              </h2>
             </div>
             <Link
               href="/content"
-              className="text-xs text-blue-400 hover:text-blue-300 transition-colors font-medium"
+              className="text-xs text-[#00ff88]/70 hover:text-[#00ff88] transition-colors font-medium font-mono"
             >
               View all →
             </Link>
           </div>
-        </CardHeader>
-        <CardContent className="p-0">
+        </div>
+        <div>
           {loading ? (
             <div className="p-6 space-y-4">
               {[1, 2, 3].map((i) => (
                 <div key={i} className="flex items-center gap-4">
-                  <Skeleton className="h-4 flex-1 bg-white/[0.06]" />
-                  <Skeleton className="h-4 w-20 bg-white/[0.06]" />
-                  <Skeleton className="h-5 w-16 bg-white/[0.06]" />
+                  <Skeleton className="h-4 flex-1 bg-white/[0.04]" />
+                  <Skeleton className="h-4 w-20 bg-white/[0.04]" />
+                  <Skeleton className="h-5 w-16 bg-white/[0.04]" />
                 </div>
               ))}
             </div>
           ) : recentContent.length === 0 ? (
-            <div className="p-12 text-center">
-              <FileText className="h-12 w-12 text-gray-700 mx-auto mb-3" />
-              <p className="text-sm text-gray-500 font-medium">
+            <div className="p-16 text-center">
+              <FileText className="h-12 w-12 text-white/10 mx-auto mb-3" />
+              <p className="text-sm text-white/40 font-medium">
                 No content pieces yet
               </p>
-              <p className="text-xs text-gray-600 mt-1">
+              <p className="text-xs text-white/20 mt-1">
                 Start by generating your first piece of content
               </p>
               <Link href="/generate">
-                <Button className="mt-4 bg-blue-600 hover:bg-blue-700 text-white text-sm">
+                <Button className="mt-5 bg-[#00ff88] hover:bg-[#00cc6a] text-[#050505] text-sm font-semibold transition-all duration-200 glow-sm hover:scale-[1.02]">
                   <Sparkles className="h-4 w-4 mr-2" />
                   Generate Content
                 </Button>
@@ -255,17 +234,17 @@ export default function DashboardPage() {
           ) : (
             <Table>
               <TableHeader>
-                <TableRow className="border-white/[0.06] hover:bg-transparent">
-                  <TableHead className="text-gray-500 text-xs font-medium">
+                <TableRow className="border-white/[0.04] hover:bg-transparent">
+                  <TableHead className="text-white/30 text-xs font-medium font-mono uppercase tracking-wider">
                     Title
                   </TableHead>
-                  <TableHead className="text-gray-500 text-xs font-medium hidden sm:table-cell">
+                  <TableHead className="text-white/30 text-xs font-medium font-mono uppercase tracking-wider hidden sm:table-cell">
                     Platform
                   </TableHead>
-                  <TableHead className="text-gray-500 text-xs font-medium">
+                  <TableHead className="text-white/30 text-xs font-medium font-mono uppercase tracking-wider">
                     Status
                   </TableHead>
-                  <TableHead className="text-gray-500 text-xs font-medium hidden md:table-cell">
+                  <TableHead className="text-white/30 text-xs font-medium font-mono uppercase tracking-wider hidden md:table-cell">
                     Date
                   </TableHead>
                 </TableRow>
@@ -274,26 +253,26 @@ export default function DashboardPage() {
                 {recentContent.map((piece) => (
                   <TableRow
                     key={piece.id}
-                    className="border-white/[0.04] hover:bg-white/[0.02] transition-colors"
+                    className="border-white/[0.04] hover:bg-white/[0.02] transition-all duration-200"
                   >
                     <TableCell className="font-medium text-white text-sm">
                       {piece.title || "Untitled"}
                     </TableCell>
-                    <TableCell className="text-gray-400 text-sm hidden sm:table-cell capitalize">
+                    <TableCell className="text-white/40 text-sm hidden sm:table-cell capitalize">
                       {piece.platform || "—"}
                     </TableCell>
                     <TableCell>
                       <Badge
                         variant="outline"
-                        className={`text-[10px] font-medium capitalize border ${
+                        className={`text-[10px] font-medium capitalize border font-mono ${
                           statusColors[piece.status] ||
-                          "bg-gray-500/15 text-gray-400 border-gray-500/20"
+                          "bg-white/5 text-white/40 border-white/10"
                         }`}
                       >
                         {piece.status}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-gray-500 text-xs hidden md:table-cell">
+                    <TableCell className="text-white/25 text-xs hidden md:table-cell">
                       {piece.created_at
                         ? new Date(piece.created_at).toLocaleDateString(
                             "en-US",
@@ -309,8 +288,8 @@ export default function DashboardPage() {
               </TableBody>
             </Table>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }
