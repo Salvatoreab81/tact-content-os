@@ -48,7 +48,8 @@ const sampleGenerated = [
     title: "Behind the Scenes: How We Design Pet Accessories 🎨",
     caption:
       "Ever wondered what goes into making your pet's favorite gear? 🤔\n\nOur design process:\n✅ Listen to pet parents' needs\n✅ Source sustainable materials\n✅ Test with real pets (the hardest critics!)\n✅ Iterate until purr-fect\n\nQuality you can trust. Love your pet deserves. ❤️\n\n#BehindTheScenes #HUEHUE #PetAccessories #SustainablePet",
-    hashtags: "#BehindTheScenes #HUEHUE #PetAccessories #SustainablePet",
+    hashtags:
+      "#BehindTheScenes #HUEHUE #PetAccessories #SustainablePet",
     type: "Reel Script",
   },
 ];
@@ -80,32 +81,30 @@ export default function GeneratePage() {
   };
 
   return (
-    <div className="p-6 sm:p-8 lg:p-10 max-w-7xl mx-auto space-y-8">
+    <div className="p-8 sm:p-10 lg:p-12 section-container space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-extrabold text-white tracking-tight heading-brutal flex items-center gap-3">
+        <h1 className="text-4xl font-extrabold text-white tracking-tight heading-glow flex items-center gap-3">
           Generate Content
-          <span className="neon-badge">
-            AI
-          </span>
+          <span className="neon-badge">AI</span>
         </h1>
-        <p className="text-sm text-white/35 mt-2">
+        <p className="text-sm text-white/50 mt-3 font-medium">
           Create AI-powered content for your brand
         </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
         {/* Form */}
-        <div className="lg:col-span-2 glass p-5 space-y-5">
-          <div className="flex items-center gap-2 pb-4 border-b border-white/[0.06]">
+        <div className="lg:col-span-2 glass glass-accent-top p-6 space-y-6">
+          <div className="flex items-center gap-2.5 pb-5 border-b border-white/[0.06]">
             <Sparkles className="h-4 w-4 text-[#00ff88]/70" />
-            <h2 className="text-sm font-semibold text-white heading-brutal">Generation Settings</h2>
+            <h2 className="text-sm font-bold text-white heading-brutal">
+              Generation Settings
+            </h2>
           </div>
 
           <div>
-            <label className="block text-[10px] font-medium text-white/30 mb-2 font-mono uppercase tracking-[0.15em]">
-              Campaign
-            </label>
+            <label className="block form-label mb-2.5">Campaign</label>
             <select
               value={form.campaign}
               onChange={(e) =>
@@ -122,9 +121,7 @@ export default function GeneratePage() {
           </div>
 
           <div>
-            <label className="block text-[10px] font-medium text-white/30 mb-2 font-mono uppercase tracking-[0.15em]">
-              Platform
-            </label>
+            <label className="block form-label mb-2.5">Platform</label>
             <div className="grid grid-cols-3 gap-2">
               {platformOptions.map((p) => (
                 <button
@@ -132,10 +129,10 @@ export default function GeneratePage() {
                   onClick={() =>
                     setForm({ ...form, platform: p.value })
                   }
-                  className={`flex flex-col items-center gap-1.5 rounded-xl border p-3 text-xs font-medium transition-all duration-200 ${
+                  className={`flex flex-col items-center gap-2 rounded-xl border p-3.5 text-xs font-medium transition-all duration-300 ${
                     form.platform === p.value
-                      ? "bg-[#00ff88]/10 border-[#00ff88]/25 text-[#00ff88]"
-                      : "bg-white/[0.03] border-white/[0.06] text-white/30 hover:text-white/60 hover:border-white/[0.12]"
+                      ? "bg-[#00ff88]/10 border-[#00ff88]/25 text-[#00ff88] shadow-[0_0_12px_rgba(0,255,136,0.06)]"
+                      : "bg-white/[0.04] border-white/[0.08] text-white/35 hover:text-white/70 hover:border-white/[0.15]"
                   }`}
                 >
                   <p.icon className="h-4 w-4" />
@@ -146,7 +143,7 @@ export default function GeneratePage() {
           </div>
 
           <div>
-            <label className="block text-[10px] font-medium text-white/30 mb-2 font-mono uppercase tracking-[0.15em]">
+            <label className="block form-label mb-2.5">
               Content Vertical
             </label>
             <div className="flex flex-wrap gap-2">
@@ -154,10 +151,10 @@ export default function GeneratePage() {
                 <button
                   key={v}
                   onClick={() => setForm({ ...form, vertical: v })}
-                  className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-all duration-200 ${
+                  className={`rounded-full border px-4 py-1.5 text-xs font-medium transition-all duration-300 ${
                     form.vertical === v
-                      ? "bg-purple-500/10 border-purple-500/25 text-purple-400"
-                      : "bg-white/[0.03] border-white/[0.06] text-white/30 hover:text-white/60 hover:border-white/[0.12]"
+                      ? "bg-purple-500/10 border-purple-500/25 text-purple-400 shadow-[0_0_10px_rgba(168,85,247,0.08)]"
+                      : "bg-white/[0.04] border-white/[0.08] text-white/35 hover:text-white/70 hover:border-white/[0.15]"
                   }`}
                 >
                   {v}
@@ -167,7 +164,7 @@ export default function GeneratePage() {
           </div>
 
           <div>
-            <label className="block text-[10px] font-medium text-white/30 mb-2 font-mono uppercase tracking-[0.15em]">
+            <label className="block form-label mb-2.5">
               Topic / Theme
             </label>
             <Input
@@ -176,14 +173,14 @@ export default function GeneratePage() {
               onChange={(e) =>
                 setForm({ ...form, topic: e.target.value })
               }
-              className="glass-input"
+              className="glass-input h-11"
             />
           </div>
 
           <Button
             onClick={handleGenerate}
             disabled={generating || !form.topic}
-            className="w-full bg-[#00ff88] hover:bg-[#00cc6a] text-[#050505] font-semibold disabled:opacity-20 disabled:cursor-not-allowed transition-all duration-200 glow-sm hover:scale-[1.02]"
+            className="w-full bg-gradient-to-r from-[#00ff88] to-[#00d4ff] hover:from-[#00cc6a] hover:to-[#00b8e0] text-[#0a0a1a] font-bold disabled:opacity-20 disabled:cursor-not-allowed transition-all duration-300 glow-sm hover:scale-[1.02] shadow-[0_0_24px_rgba(0,255,136,0.2)] h-12 rounded-xl"
           >
             {generating ? (
               <>
@@ -200,27 +197,27 @@ export default function GeneratePage() {
         </div>
 
         {/* Preview */}
-        <div className="lg:col-span-3 space-y-4">
+        <div className="lg:col-span-3 space-y-5">
           {generating && (
-            <div className="glass p-12 text-center">
-              <div className="flex flex-col items-center gap-4">
+            <div className="glass p-14 text-center">
+              <div className="flex flex-col items-center gap-5">
                 <div className="relative">
-                  <Loader2 className="h-10 w-10 text-[#00ff88] animate-spin" />
+                  <Loader2 className="h-12 w-12 text-[#00ff88] animate-spin" />
                   <Sparkles className="h-5 w-5 text-[#00ff88]/60 absolute -top-1 -right-1 animate-pulse" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-white">
+                  <p className="text-sm font-bold text-white">
                     Creating your content...
                   </p>
-                  <p className="text-xs text-white/25 mt-1">
+                  <p className="text-xs text-white/30 mt-1.5">
                     Our AI is crafting the perfect post
                   </p>
                 </div>
-                <div className="flex gap-1">
+                <div className="flex gap-1.5">
                   {[1, 2, 3].map((i) => (
                     <div
                       key={i}
-                      className="h-1.5 w-1.5 rounded-full bg-[#00ff88] animate-bounce"
+                      className="h-2 w-2 rounded-full bg-[#00ff88] animate-bounce"
                       style={{ animationDelay: `${i * 0.15}s` }}
                     />
                   ))}
@@ -230,15 +227,15 @@ export default function GeneratePage() {
           )}
 
           {!generating && generated.length === 0 && (
-            <div className="glass p-16 text-center">
-              <div className="flex flex-col items-center gap-3">
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#00ff88]/6 border border-[#00ff88]/10">
-                  <Sparkles className="h-7 w-7 text-[#00ff88]/40" />
+            <div className="glass p-20 text-center">
+              <div className="flex flex-col items-center gap-4">
+                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#00ff88]/6 border border-[#00ff88]/10">
+                  <Sparkles className="h-8 w-8 text-[#00ff88]/35" />
                 </div>
-                <p className="text-sm font-medium text-white/40">
+                <p className="text-sm font-bold text-white/45">
                   Your generated content will appear here
                 </p>
-                <p className="text-xs text-white/20 max-w-sm">
+                <p className="text-xs text-white/25 max-w-sm">
                   Configure your settings and click Generate to create
                   AI-powered content for your brand
                 </p>
@@ -249,22 +246,22 @@ export default function GeneratePage() {
           {generated.map((item, i) => (
             <div
               key={i}
-              className="glass glass-hover transition-all duration-200"
+              className="glass glass-hover transition-all duration-300"
             >
-              <div className="px-5 py-4 border-b border-white/[0.06]">
+              <div className="px-6 py-5 border-b border-white/[0.06]">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="rounded-md bg-purple-500/8 border border-purple-500/12 px-2 py-0.5 text-[10px] font-medium text-purple-400 font-mono">
+                  <div className="flex items-center gap-3">
+                    <span className="cyan-badge">
                       {item.type}
                     </span>
-                    <h3 className="text-sm font-semibold text-white heading-brutal">
+                    <h3 className="text-sm font-bold text-white heading-brutal">
                       {item.title}
                     </h3>
                   </div>
                   <div className="flex items-center gap-1">
                     <button
                       onClick={() => handleCopy(item.caption, i)}
-                      className="p-1.5 rounded-lg hover:bg-white/[0.06] text-white/20 hover:text-white/60 transition-all duration-200"
+                      className="p-2 rounded-xl hover:bg-white/[0.06] text-white/25 hover:text-[#00ff88]/70 transition-all duration-300"
                       title="Copy"
                     >
                       {copiedIndex === i ? (
@@ -275,7 +272,7 @@ export default function GeneratePage() {
                     </button>
                     <button
                       onClick={handleGenerate}
-                      className="p-1.5 rounded-lg hover:bg-white/[0.06] text-white/20 hover:text-white/60 transition-all duration-200"
+                      className="p-2 rounded-xl hover:bg-white/[0.06] text-white/25 hover:text-[#00d4ff]/70 transition-all duration-300"
                       title="Regenerate"
                     >
                       <RefreshCw className="h-3.5 w-3.5" />
@@ -283,21 +280,21 @@ export default function GeneratePage() {
                   </div>
                 </div>
               </div>
-              <div className="p-5">
-                <div className="rounded-xl bg-white/[0.03] border border-white/[0.06] p-4">
-                  <p className="text-sm text-white/60 whitespace-pre-wrap leading-relaxed">
+              <div className="p-6">
+                <div className="rounded-xl bg-white/[0.04] border border-white/[0.08] p-5">
+                  <p className="text-sm text-white/65 whitespace-pre-wrap leading-relaxed">
                     {item.caption}
                   </p>
                 </div>
-                <div className="flex items-center justify-between mt-4">
-                  <span className="text-[10px] text-white/20 font-mono uppercase tracking-wider">
+                <div className="flex items-center justify-between mt-5">
+                  <span className="text-[10px] text-white/25 font-mono uppercase tracking-[0.1em]">
                     {item.caption.split(" ").length} words
                   </span>
                   <div className="flex items-center gap-2">
                     <Button
                       size="sm"
                       variant="ghost"
-                      className="text-xs text-white/30 hover:text-white/60 h-7 transition-colors duration-200"
+                      className="text-xs text-white/35 hover:text-white/70 h-8 transition-colors duration-300 rounded-xl"
                       onClick={() => handleCopy(item.caption, i)}
                     >
                       <Copy className="h-3 w-3 mr-1" />
@@ -305,7 +302,7 @@ export default function GeneratePage() {
                     </Button>
                     <Button
                       size="sm"
-                      className="text-xs bg-[#00ff88]/10 text-[#00ff88] hover:bg-[#00ff88]/15 h-7 border-0 font-mono transition-all duration-200"
+                      className="text-xs bg-[#00ff88]/10 text-[#00ff88] hover:bg-[#00ff88]/15 h-8 border-0 font-mono transition-all duration-300 rounded-xl"
                     >
                       <Send className="h-3 w-3 mr-1" />
                       Publish

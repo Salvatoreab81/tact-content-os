@@ -132,20 +132,20 @@ export default function CalendarPage() {
   };
 
   return (
-    <div className="p-6 sm:p-8 lg:p-10 max-w-7xl mx-auto space-y-8">
+    <div className="p-8 sm:p-10 lg:p-12 section-container space-y-8">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold text-white tracking-tight heading-brutal">
+          <h1 className="text-4xl font-extrabold text-white tracking-tight heading-glow">
             Calendar
           </h1>
-          <p className="text-sm text-white/35 mt-2">
+          <p className="text-sm text-white/50 mt-3 font-medium">
             Plan and visualize your content schedule
           </p>
         </div>
         <Button
           onClick={() => setShowAddForm(!showAddForm)}
-          className="bg-[#00ff88] hover:bg-[#00cc6a] text-[#050505] font-semibold self-start transition-all duration-200 glow-sm hover:scale-[1.02]"
+          className="bg-[#00ff88] hover:bg-[#00cc6a] text-[#0a0a1a] font-bold self-start transition-all duration-300 glow-sm hover:scale-[1.03] shadow-[0_0_20px_rgba(0,255,136,0.2)]"
         >
           <Plus className="h-4 w-4 mr-2" />
           Add Event
@@ -154,12 +154,12 @@ export default function CalendarPage() {
 
       {/* Add Event Form */}
       {showAddForm && (
-        <div className="glass p-5 border-[#00ff88]/15">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold text-white heading-brutal">New Event</h3>
+        <div className="glass glass-accent-top p-6">
+          <div className="flex items-center justify-between mb-5">
+            <h3 className="text-sm font-bold text-white heading-brutal">New Event</h3>
             <button
               onClick={() => setShowAddForm(false)}
-              className="text-white/25 hover:text-white/60 transition-colors"
+              className="text-white/30 hover:text-white/70 transition-colors duration-300"
             >
               <X className="h-4 w-4" />
             </button>
@@ -194,7 +194,7 @@ export default function CalendarPage() {
             </select>
             <Button
               onClick={addEvent}
-              className="bg-[#00ff88] hover:bg-[#00cc6a] text-[#050505] font-semibold transition-all duration-200"
+              className="bg-[#00ff88] hover:bg-[#00cc6a] text-[#0a0a1a] font-bold transition-all duration-300"
             >
               Add
             </Button>
@@ -205,7 +205,7 @@ export default function CalendarPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Calendar Grid */}
         <div className="lg:col-span-2 glass overflow-hidden">
-          <div className="px-5 py-4 border-b border-white/[0.06]">
+          <div className="px-6 py-5 border-b border-white/[0.06]">
             <div className="flex items-center justify-between">
               <button
                 onClick={() =>
@@ -213,14 +213,14 @@ export default function CalendarPage() {
                     ? (setYear((y) => y - 1), setViewMonth(11))
                     : setViewMonth((m) => m - 1)
                 }
-                className="p-2 rounded-lg hover:bg-white/[0.06] transition-colors text-white/30 hover:text-white"
+                className="p-2.5 rounded-xl hover:bg-white/[0.06] transition-all duration-300 text-white/30 hover:text-white"
               >
                 <ChevronLeft className="h-4 w-4" />
               </button>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-4">
                 <button
                   onClick={() => setYear((y) => y - 1)}
-                  className="text-white/25 hover:text-white/60 text-xs transition-colors font-mono"
+                  className="text-white/30 hover:text-white/70 text-xs transition-colors duration-300 font-mono"
                 >
                   ← {year - 1}
                 </button>
@@ -229,7 +229,7 @@ export default function CalendarPage() {
                 </h2>
                 <button
                   onClick={() => setYear((y) => y + 1)}
-                  className="text-white/25 hover:text-white/60 text-xs transition-colors font-mono"
+                  className="text-white/30 hover:text-white/70 text-xs transition-colors duration-300 font-mono"
                 >
                   {year + 1} →
                 </button>
@@ -240,19 +240,19 @@ export default function CalendarPage() {
                     ? (setYear((y) => y + 1), setViewMonth(0))
                     : setViewMonth((m) => m + 1)
                 }
-                className="p-2 rounded-lg hover:bg-white/[0.06] transition-colors text-white/30 hover:text-white"
+                className="p-2.5 rounded-xl hover:bg-white/[0.06] transition-all duration-300 text-white/30 hover:text-white"
               >
                 <ChevronRight className="h-4 w-4" />
               </button>
             </div>
           </div>
-          <div className="p-4">
+          <div className="p-5">
             {/* Weekday headers */}
-            <div className="grid grid-cols-7 mb-2">
+            <div className="grid grid-cols-7 mb-3">
               {WEEKDAYS.map((day) => (
                 <div
                   key={day}
-                  className="text-center text-[10px] font-medium text-white/25 py-2 font-mono uppercase tracking-wider"
+                  className="text-center text-[10px] font-semibold text-white/30 py-2.5 font-mono uppercase tracking-[0.1em]"
                 >
                   {day}
                 </div>
@@ -275,12 +275,12 @@ export default function CalendarPage() {
                   <button
                     key={day}
                     onClick={() => setSelectedDate(dateStr)}
-                    className={`aspect-square rounded-xl p-1.5 flex flex-col items-center justify-start gap-0.5 transition-all duration-200 relative ${
+                    className={`calendar-day aspect-square p-1.5 flex flex-col items-center justify-start gap-0.5 relative ${
                       isSelected
-                        ? "bg-[#00ff88]/10 border border-[#00ff88]/25 shadow-[0_0_12px_rgba(0,255,136,0.06)]"
+                        ? "selected"
                         : isToday
-                          ? "bg-white/[0.06] border border-white/[0.08]"
-                          : "hover:bg-white/[0.04] border border-transparent"
+                          ? "today"
+                          : ""
                     }`}
                   >
                     <span
@@ -315,9 +315,9 @@ export default function CalendarPage() {
 
         {/* Day Detail / Legend */}
         <div className="space-y-4">
-          <div className="glass p-5">
-            <h3 className="text-sm font-semibold text-white flex items-center gap-2 heading-brutal mb-3">
-              <CalendarIcon className="h-4 w-4 text-white/25" />
+          <div className="glass p-6">
+            <h3 className="text-sm font-bold text-white flex items-center gap-2 heading-brutal mb-4">
+              <CalendarIcon className="h-4 w-4 text-[#00d4ff]/50" />
               {selectedDate
                 ? new Date(selectedDate + "T00:00:00").toLocaleDateString(
                     "en-US",
@@ -332,29 +332,29 @@ export default function CalendarPage() {
             <div>
               {selectedDate ? (
                 selectedDayEvents.length > 0 ? (
-                  <div className="space-y-2">
+                  <div className="space-y-2.5">
                     {selectedDayEvents.map((event) => (
                       <div
                         key={event.id}
-                        className={`rounded-xl border p-3 ${
+                        className={`rounded-xl border p-4 transition-all duration-300 ${
                           effortColors[event.effort_level] ||
                           "bg-white/[0.04] border-white/[0.08] text-white/40"
                         }`}
                       >
                         <p className="text-sm font-medium">{event.title}</p>
-                        <p className="text-xs opacity-60 capitalize font-mono">
+                        <p className="text-xs opacity-60 capitalize font-mono mt-1">
                           {event.event_type} · {event.effort_level} effort
                         </p>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-sm text-white/20 text-center py-4">
+                  <p className="text-sm text-white/25 text-center py-5">
                     No events on this day
                   </p>
                 )
               ) : (
-                <p className="text-sm text-white/20 text-center py-4">
+                <p className="text-sm text-white/25 text-center py-5">
                   Click on a day to see events
                 </p>
               )}
@@ -362,29 +362,29 @@ export default function CalendarPage() {
           </div>
 
           {/* Legend */}
-          <div className="glass p-5">
-            <h3 className="text-sm font-semibold text-white mb-3 heading-brutal">
+          <div className="glass p-6">
+            <h3 className="text-sm font-bold text-white mb-4 heading-brutal">
               Effort Level
             </h3>
-            <div className="space-y-2.5">
+            <div className="space-y-3">
               <div className="flex items-center gap-3">
-                <div className="h-2.5 w-2.5 rounded-full bg-[#00ff88] shadow-[0_0_8px_rgba(0,255,136,0.3)]" />
-                <span className="text-sm text-white/40">Low</span>
+                <div className="h-2.5 w-2.5 rounded-full bg-[#00ff88] shadow-[0_0_10px_rgba(0,255,136,0.3)]" />
+                <span className="text-sm text-white/45">Low</span>
               </div>
               <div className="flex items-center gap-3">
-                <div className="h-2.5 w-2.5 rounded-full bg-[#ffaa00] shadow-[0_0_8px_rgba(255,170,0,0.3)]" />
-                <span className="text-sm text-white/40">Medium</span>
+                <div className="h-2.5 w-2.5 rounded-full bg-[#ffaa00] shadow-[0_0_10px_rgba(255,170,0,0.3)]" />
+                <span className="text-sm text-white/45">Medium</span>
               </div>
               <div className="flex items-center gap-3">
-                <div className="h-2.5 w-2.5 rounded-full bg-[#ff3366] shadow-[0_0_8px_rgba(255,51,102,0.3)]" />
-                <span className="text-sm text-white/40">High</span>
+                <div className="h-2.5 w-2.5 rounded-full bg-[#ff3366] shadow-[0_0_10px_rgba(255,51,102,0.3)]" />
+                <span className="text-sm text-white/45">High</span>
               </div>
             </div>
           </div>
 
           {/* Month Quick Nav */}
-          <div className="glass p-5">
-            <h3 className="text-sm font-semibold text-white mb-3 heading-brutal">
+          <div className="glass p-6">
+            <h3 className="text-sm font-bold text-white mb-4 heading-brutal">
               Quick Nav
             </h3>
             <div className="grid grid-cols-4 gap-1.5">
@@ -392,10 +392,10 @@ export default function CalendarPage() {
                 <button
                   key={m}
                   onClick={() => setViewMonth(i)}
-                  className={`rounded-lg px-2 py-1.5 text-[10px] font-medium transition-all duration-200 font-mono ${
+                  className={`rounded-xl px-2 py-2 text-[10px] font-semibold transition-all duration-300 font-mono ${
                     i === viewMonth
-                      ? "bg-[#00ff88]/10 text-[#00ff88] border border-[#00ff88]/20"
-                      : "text-white/25 hover:text-white/50 hover:bg-white/[0.04] border border-transparent"
+                      ? "bg-[#00ff88]/10 text-[#00ff88] border border-[#00ff88]/20 shadow-[0_0_10px_rgba(0,255,136,0.06)]"
+                      : "text-white/30 hover:text-white/60 hover:bg-white/[0.05] border border-transparent"
                   }`}
                 >
                   {m.slice(0, 3)}

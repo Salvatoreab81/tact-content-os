@@ -151,20 +151,20 @@ export default function OnboardingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#050505] grid-bg flex flex-col items-center justify-center p-4 sm:p-6">
+    <div className="min-h-screen grid-bg flex flex-col items-center justify-center p-4 sm:p-6 relative z-10">
       <div className="w-full max-w-2xl">
         {/* Header */}
         <div className="text-center mb-10">
-          <div className="flex items-center justify-center gap-3 mb-5">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#00ff88]/10 border border-[#00ff88]/20 text-[#00ff88] font-bold shadow-[0_0_20px_rgba(0,255,136,0.1)]">
+          <div className="flex items-center justify-center gap-3 mb-6">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#00ff88]/10 border border-[#00ff88]/25 text-[#00ff88] font-bold text-base shadow-[0_0_24px_rgba(0,255,136,0.12)] transition-all duration-300 hover:shadow-[0_0_32px_rgba(0,255,136,0.2)]">
               T
             </div>
-            <span className="text-lg font-bold text-white heading-brutal">TACT</span>
+            <span className="text-xl font-bold text-white heading-brutal">TACT</span>
           </div>
-          <h1 className="text-2xl font-extrabold text-white mb-2 heading-brutal">
+          <h1 className="text-3xl font-extrabold text-white mb-3 heading-glow">
             Set up your brand
           </h1>
-          <p className="text-sm text-white/35">
+          <p className="text-sm text-white/45 font-medium">
             Tell us about your brand to get personalized content
           </p>
         </div>
@@ -172,27 +172,28 @@ export default function OnboardingPage() {
         {/* Progress */}
         <div className="mb-10">
           {/* Progress bar */}
-          <div className="h-1 bg-white/[0.06] rounded-full mb-6 overflow-hidden">
+          <div className="h-1 bg-white/[0.06] rounded-full mb-7 overflow-hidden">
             <div
-              className="h-full bg-[#00ff88] rounded-full transition-all duration-500 ease-out"
+              className="h-full rounded-full transition-all duration-600 ease-out"
               style={{
                 width: `${((step + 1) / STEPS.length) * 100}%`,
-                boxShadow: "0 0 12px rgba(0,255,136,0.3)",
+                background: "linear-gradient(90deg, #00ff88, #00d4ff)",
+                boxShadow: "0 0 16px rgba(0,255,136,0.3)",
               }}
             />
           </div>
 
           {/* Step indicators */}
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center justify-between mb-4">
             {STEPS.map((s, i) => (
               <div key={s.title} className="flex items-center">
                 <div
-                  className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold transition-all duration-300 font-mono ${
+                  className={`flex h-9 w-9 items-center justify-center rounded-full text-xs font-bold transition-all duration-300 font-mono ${
                     i < step
-                      ? "bg-[#00ff88] text-[#050505] shadow-[0_0_12px_rgba(0,255,136,0.2)]"
+                      ? "step-completed"
                       : i === step
-                        ? "bg-[#00ff88]/10 text-[#00ff88] border border-[#00ff88]/30 shadow-[0_0_12px_rgba(0,255,136,0.08)]"
-                        : "bg-white/[0.04] text-white/20 border border-white/[0.06]"
+                        ? "step-active"
+                        : "step-pending"
                   }`}
                 >
                   {i < step ? (
@@ -203,8 +204,10 @@ export default function OnboardingPage() {
                 </div>
                 {i < STEPS.length - 1 && (
                   <div
-                    className={`hidden sm:block w-8 lg:w-16 h-px mx-1 transition-colors duration-300 ${
-                      i < step ? "bg-[#00ff88]/50" : "bg-white/[0.06]"
+                    className={`hidden sm:block w-8 lg:w-16 h-px mx-1 transition-all duration-300 ${
+                      i < step
+                        ? "bg-gradient-to-r from-[#00ff88]/50 to-[#00d4ff]/50"
+                        : "bg-white/[0.06]"
                     }`}
                   />
                 )}
@@ -212,31 +215,31 @@ export default function OnboardingPage() {
             ))}
           </div>
           <div className="flex justify-between">
-            <span className="text-xs text-white/25 font-medium font-mono">
+            <span className="text-[10px] text-white/30 font-semibold font-mono uppercase tracking-[0.1em]">
               Step {step + 1} of {STEPS.length}
             </span>
-            <span className="text-xs text-white/25 font-medium font-mono">
+            <span className="text-[10px] text-white/30 font-semibold font-mono uppercase tracking-[0.1em]">
               {STEPS[step].title}
             </span>
           </div>
         </div>
 
         {/* Step content */}
-        <div className="glass p-6 sm:p-8">
+        <div className="glass glass-accent-top p-8 sm:p-10">
           {/* Step 0: Brand Basics */}
           {step === 0 && (
-            <div className="space-y-6">
+            <div className="space-y-7">
               <div>
-                <h2 className="text-lg font-bold text-white mb-1 heading-brutal">
+                <h2 className="text-xl font-bold text-white mb-2 heading-brutal">
                   Brand Basics
                 </h2>
-                <p className="text-sm text-white/35">
+                <p className="text-sm text-white/40">
                   Start with your brand&apos;s core information
                 </p>
               </div>
-              <div className="space-y-4">
+              <div className="space-y-5">
                 <div>
-                  <label className="block text-xs font-medium text-white/40 mb-2 font-mono uppercase tracking-wider">
+                  <label className="block form-label mb-2">
                     Brand Name *
                   </label>
                   <Input
@@ -248,32 +251,32 @@ export default function OnboardingPage() {
                         slug: generateSlug(e.target.value),
                       });
                     }}
-                    className="glass-input"
+                    className="glass-input h-11"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-white/40 mb-2 font-mono uppercase tracking-wider">
+                  <label className="block form-label mb-2">
                     URL Slug
                   </label>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm text-white/25 font-mono">tact.app/</span>
+                    <span className="text-sm text-white/30 font-mono">tact.app/</span>
                     <Input
                       placeholder="huehue"
                       value={form.slug}
                       onChange={(e) => updateForm({ slug: e.target.value })}
-                      className="glass-input"
+                      className="glass-input h-11"
                     />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-white/40 mb-2 font-mono uppercase tracking-wider">
+                  <label className="block form-label mb-2">
                     Industry *
                   </label>
                   <Input
                     placeholder="e.g., Pet Accessories"
                     value={form.industry}
                     onChange={(e) => updateForm({ industry: e.target.value })}
-                    className="glass-input"
+                    className="glass-input h-11"
                   />
                 </div>
               </div>
@@ -282,17 +285,17 @@ export default function OnboardingPage() {
 
           {/* Step 1: Tone of Voice */}
           {step === 1 && (
-            <div className="space-y-6">
+            <div className="space-y-7">
               <div>
-                <h2 className="text-lg font-bold text-white mb-1 heading-brutal">
+                <h2 className="text-xl font-bold text-white mb-2 heading-brutal">
                   Tone of Voice
                 </h2>
-                <p className="text-sm text-white/35">
+                <p className="text-sm text-white/40">
                   How should your brand sound?
                 </p>
               </div>
               <div>
-                <label className="block text-xs font-medium text-white/40 mb-2 font-mono uppercase tracking-wider">
+                <label className="block form-label mb-2">
                   Describe your brand&apos;s voice *
                 </label>
                 <textarea
@@ -306,7 +309,7 @@ export default function OnboardingPage() {
                 />
               </div>
               <div>
-                <p className="text-[10px] text-white/25 mb-3 font-mono uppercase tracking-[0.15em] font-semibold">
+                <p className="text-[10px] text-white/30 mb-3 font-semibold font-mono uppercase tracking-[0.12em]">
                   Quick presets
                 </p>
                 <div className="flex flex-wrap gap-2">
@@ -329,7 +332,7 @@ export default function OnboardingPage() {
                             : preset.toLowerCase(),
                         })
                       }
-                      className="rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-1.5 text-xs font-medium text-white/40 hover:text-[#00ff88] hover:border-[#00ff88]/20 hover:bg-[#00ff88]/5 transition-all duration-200"
+                      className="rounded-full border border-white/[0.1] bg-white/[0.04] px-4 py-2 text-xs font-medium text-white/45 hover:text-[#00ff88] hover:border-[#00ff88]/25 hover:bg-[#00ff88]/5 transition-all duration-300"
                     >
                       {preset}
                     </button>
@@ -341,24 +344,24 @@ export default function OnboardingPage() {
 
           {/* Step 2: Markets */}
           {step === 2 && (
-            <div className="space-y-6">
+            <div className="space-y-7">
               <div>
-                <h2 className="text-lg font-bold text-white mb-1 heading-brutal">
+                <h2 className="text-xl font-bold text-white mb-2 heading-brutal">
                   Target Markets
                 </h2>
-                <p className="text-sm text-white/35">
+                <p className="text-sm text-white/40">
                   Where do your customers live?
                 </p>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
                 {COUNTRIES.map((country) => (
                   <button
                     key={country}
                     onClick={() => toggleArrayItem("markets", country)}
-                    className={`rounded-xl border px-4 py-3 text-sm font-medium transition-all duration-200 ${
+                    className={`rounded-xl border px-4 py-3 text-sm font-medium transition-all duration-300 ${
                       form.markets.includes(country)
-                        ? "bg-[#00ff88]/10 border-[#00ff88]/25 text-[#00ff88]"
-                        : "bg-white/[0.03] border-white/[0.06] text-white/40 hover:text-white hover:border-white/[0.12]"
+                        ? "bg-[#00ff88]/10 border-[#00ff88]/25 text-[#00ff88] shadow-[0_0_12px_rgba(0,255,136,0.06)]"
+                        : "bg-white/[0.04] border-white/[0.08] text-white/45 hover:text-white hover:border-white/[0.15]"
                     }`}
                   >
                     {country}
@@ -366,7 +369,7 @@ export default function OnboardingPage() {
                 ))}
               </div>
               {form.markets.length > 0 && (
-                <p className="text-xs text-white/25 font-mono">
+                <p className="text-xs text-white/30 font-mono">
                   {form.markets.length} market
                   {form.markets.length !== 1 ? "s" : ""} selected
                 </p>
@@ -376,12 +379,12 @@ export default function OnboardingPage() {
 
           {/* Step 3: Platforms */}
           {step === 3 && (
-            <div className="space-y-6">
+            <div className="space-y-7">
               <div>
-                <h2 className="text-lg font-bold text-white mb-1 heading-brutal">
+                <h2 className="text-xl font-bold text-white mb-2 heading-brutal">
                   Platforms
                 </h2>
-                <p className="text-sm text-white/35">
+                <p className="text-sm text-white/40">
                   Where will you publish content?
                 </p>
               </div>
@@ -392,10 +395,10 @@ export default function OnboardingPage() {
                     onClick={() =>
                       toggleArrayItem("platforms", platform.id)
                     }
-                    className={`flex flex-col items-center gap-3 rounded-xl border p-5 transition-all duration-200 ${
+                    className={`flex flex-col items-center gap-3 rounded-xl border p-6 transition-all duration-300 ${
                       form.platforms.includes(platform.id)
-                        ? "bg-[#00ff88]/10 border-[#00ff88]/25 text-[#00ff88]"
-                        : "bg-white/[0.03] border-white/[0.06] text-white/40 hover:text-white hover:border-white/[0.12]"
+                        ? "bg-[#00ff88]/10 border-[#00ff88]/25 text-[#00ff88] shadow-[0_0_12px_rgba(0,255,136,0.06)]"
+                        : "bg-white/[0.04] border-white/[0.08] text-white/45 hover:text-white hover:border-white/[0.15]"
                     }`}
                   >
                     <platform.icon className="h-6 w-6" />
@@ -410,12 +413,12 @@ export default function OnboardingPage() {
 
           {/* Step 4: Content Verticals */}
           {step === 4 && (
-            <div className="space-y-6">
+            <div className="space-y-7">
               <div>
-                <h2 className="text-lg font-bold text-white mb-1 heading-brutal">
+                <h2 className="text-xl font-bold text-white mb-2 heading-brutal">
                   Content Verticals
                 </h2>
-                <p className="text-sm text-white/35">
+                <p className="text-sm text-white/40">
                   What types of content will you create?
                 </p>
               </div>
@@ -439,10 +442,10 @@ export default function OnboardingPage() {
                       onClick={() =>
                         toggleArrayItem("contentVerticals", vertical.id)
                       }
-                      className={`flex flex-col items-center gap-3 rounded-xl border p-5 transition-all duration-200 ${
+                      className={`flex flex-col items-center gap-3 rounded-xl border p-6 transition-all duration-300 ${
                         isActive
                           ? colorMap[vertical.color]
-                          : "bg-white/[0.03] border-white/[0.06] text-white/40 hover:text-white hover:border-white/[0.12]"
+                          : "bg-white/[0.04] border-white/[0.08] text-white/45 hover:text-white hover:border-white/[0.15]"
                       }`}
                     >
                       <vertical.icon className="h-6 w-6" />
@@ -458,63 +461,63 @@ export default function OnboardingPage() {
 
           {/* Step 5: Review */}
           {step === 5 && (
-            <div className="space-y-6">
+            <div className="space-y-7">
               <div>
-                <h2 className="text-lg font-bold text-white mb-1 heading-brutal">
+                <h2 className="text-xl font-bold text-white mb-2 heading-brutal">
                   Review & Submit
                 </h2>
-                <p className="text-sm text-white/35">
+                <p className="text-sm text-white/40">
                   Check everything looks good
                 </p>
               </div>
-              <div className="space-y-4">
+              <div className="space-y-5">
                 <ReviewSection title="Brand">
                   <p className="text-white font-medium">
                     {form.name || "—"}
                   </p>
-                  <p className="text-sm text-white/35">
+                  <p className="text-sm text-white/40">
                     {form.industry} · {form.slug || generateSlug(form.name)}
                   </p>
                 </ReviewSection>
-                <div className="h-px bg-white/[0.06]" />
+                <div className="h-px bg-gradient-to-r from-transparent via-white/[0.08] to-transparent" />
                 <ReviewSection title="Tone of Voice">
                   <p className="text-sm text-white/60">
                     {form.toneOfVoice || "—"}
                   </p>
                 </ReviewSection>
-                <div className="h-px bg-white/[0.06]" />
+                <div className="h-px bg-gradient-to-r from-transparent via-white/[0.08] to-transparent" />
                 <ReviewSection title="Markets">
                   <div className="flex flex-wrap gap-1.5">
                     {form.markets.map((m) => (
                       <span
                         key={m}
-                        className="rounded-md bg-white/[0.06] border border-white/[0.08] px-2 py-1 text-xs text-white/40 font-mono"
+                        className="rounded-lg bg-white/[0.06] border border-white/[0.08] px-3 py-1.5 text-xs text-white/50 font-mono"
                       >
                         {m}
                       </span>
                     ))}
                   </div>
                 </ReviewSection>
-                <div className="h-px bg-white/[0.06]" />
+                <div className="h-px bg-gradient-to-r from-transparent via-white/[0.08] to-transparent" />
                 <ReviewSection title="Platforms">
                   <div className="flex flex-wrap gap-1.5">
                     {form.platforms.map((p) => (
                       <span
                         key={p}
-                        className="rounded-md bg-[#00ff88]/8 border border-[#00ff88]/12 px-2 py-1 text-xs text-[#00ff88] capitalize font-mono"
+                        className="rounded-lg bg-[#00ff88]/8 border border-[#00ff88]/12 px-3 py-1.5 text-xs text-[#00ff88] capitalize font-mono"
                       >
                         {p}
                       </span>
                     ))}
                   </div>
                 </ReviewSection>
-                <div className="h-px bg-white/[0.06]" />
+                <div className="h-px bg-gradient-to-r from-transparent via-white/[0.08] to-transparent" />
                 <ReviewSection title="Content Verticals">
                   <div className="flex flex-wrap gap-1.5">
                     {form.contentVerticals.map((v) => (
                       <span
                         key={v}
-                        className="rounded-md bg-purple-500/8 border border-purple-500/12 px-2 py-1 text-xs text-purple-400 capitalize font-mono"
+                        className="rounded-lg bg-purple-500/8 border border-purple-500/12 px-3 py-1.5 text-xs text-purple-400 capitalize font-mono"
                       >
                         {v}
                       </span>
@@ -532,7 +535,7 @@ export default function OnboardingPage() {
             variant="ghost"
             onClick={() => setStep((s) => s - 1)}
             disabled={step === 0}
-            className="text-white/30 hover:text-white/60 disabled:opacity-20 transition-all duration-200"
+            className="text-white/35 hover:text-white/70 disabled:opacity-20 transition-all duration-300"
           >
             <ChevronLeft className="h-4 w-4 mr-1" />
             Back
@@ -541,7 +544,7 @@ export default function OnboardingPage() {
             <Button
               onClick={() => setStep((s) => s + 1)}
               disabled={!canProceed()}
-              className="bg-[#00ff88] hover:bg-[#00cc6a] text-[#050505] font-semibold disabled:opacity-20 disabled:cursor-not-allowed transition-all duration-200 glow-sm hover:scale-[1.02]"
+              className="bg-[#00ff88] hover:bg-[#00cc6a] text-[#0a0a1a] font-bold disabled:opacity-20 disabled:cursor-not-allowed transition-all duration-300 glow-sm hover:scale-[1.03] shadow-[0_0_20px_rgba(0,255,136,0.2)]"
             >
               Continue
               <ChevronRight className="h-4 w-4 ml-1" />
@@ -550,7 +553,7 @@ export default function OnboardingPage() {
             <Button
               onClick={handleSubmit}
               disabled={submitting}
-              className="bg-[#00ff88] hover:bg-[#00cc6a] text-[#050505] font-semibold transition-all duration-200 glow-sm hover:scale-[1.02]"
+              className="bg-[#00ff88] hover:bg-[#00cc6a] text-[#0a0a1a] font-bold transition-all duration-300 glow-sm hover:scale-[1.03] shadow-[0_0_20px_rgba(0,255,136,0.2)]"
             >
               {submitting ? (
                 "Setting up..."
@@ -577,7 +580,7 @@ function ReviewSection({
 }) {
   return (
     <div>
-      <p className="text-[10px] font-medium text-white/25 uppercase tracking-[0.15em] mb-2 font-mono">
+      <p className="text-[10px] font-semibold text-white/30 uppercase tracking-[0.12em] mb-2.5 font-mono">
         {title}
       </p>
       {children}

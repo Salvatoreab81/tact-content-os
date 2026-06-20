@@ -36,11 +36,11 @@ interface ContentPiece {
 }
 
 const statusColors: Record<string, string> = {
-  planned: "bg-[#00ff88]/10 text-[#00ff88] border-[#00ff88]/15",
-  drafting: "bg-[#ffaa00]/10 text-[#ffaa00] border-[#ffaa00]/15",
-  review: "bg-[#ff8844]/10 text-[#ff8844] border-[#ff8844]/15",
-  approved: "bg-[#00cc6a]/10 text-[#00cc6a] border-[#00cc6a]/15",
-  published: "bg-white/5 text-white/60 border-white/10",
+  planned: "bg-[#00ff88]/10 text-[#00ff88] border-[#00ff88]/20",
+  drafting: "bg-[#ffaa00]/10 text-[#ffaa00] border-[#ffaa00]/20",
+  review: "bg-[#ff8844]/10 text-[#ff8844] border-[#ff8844]/20",
+  approved: "bg-[#00cc6a]/10 text-[#00cc6a] border-[#00cc6a]/20",
+  published: "bg-[#00d4ff]/8 text-[#00d4ff]/70 border-[#00d4ff]/12",
 };
 
 export default function DashboardPage() {
@@ -112,37 +112,39 @@ export default function DashboardPage() {
   ];
 
   return (
-    <div className="p-6 sm:p-8 lg:p-10 max-w-7xl mx-auto space-y-10">
+    <div className="p-8 sm:p-10 lg:p-12 section-container space-y-10">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-extrabold text-white tracking-tight heading-brutal">
+        <h1 className="text-4xl font-extrabold text-white tracking-tight heading-glow">
           Dashboard
         </h1>
-        <p className="text-sm text-white/35 mt-2">
+        <p className="text-sm text-white/50 mt-3 font-medium">
           Welcome back. Here&apos;s your content overview.
         </p>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
         {statCards.map((card) => (
           <div
             key={card.title}
-            className="glass glass-hover p-5 transition-all duration-200 group"
+            className="glass glass-hover stat-accent p-6 group"
           >
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/[0.04] border border-white/[0.06]">
-                <card.icon className="h-5 w-5 text-white/40 group-hover:text-[#00ff88] transition-colors duration-200" />
+            <div className="flex items-center justify-between mb-5">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#00ff88]/8 border border-[#00ff88]/15 group-hover:border-[#00ff88]/25 group-hover:shadow-[0_0_16px_rgba(0,255,136,0.1)] transition-all duration-300">
+                <card.icon className="h-5 w-5 text-[#00ff88]/60 group-hover:text-[#00ff88] transition-colors duration-300" />
               </div>
-              <TrendingUp className="h-4 w-4 text-white/15 group-hover:text-white/30 transition-colors duration-200" />
+              <TrendingUp className="h-4 w-4 text-white/15 group-hover:text-[#00d4ff]/50 transition-colors duration-300" />
             </div>
             <div>
               {loading ? (
-                <Skeleton className="h-9 w-16 bg-white/[0.04]" />
+                <Skeleton className="h-10 w-16 bg-white/[0.04]" />
               ) : (
-                <p className="text-3xl font-extrabold stat-number">{card.value}</p>
+                <p className="text-4xl font-extrabold stat-number leading-none">
+                  {card.value}
+                </p>
               )}
-              <p className="text-xs text-white/35 mt-1 font-medium font-mono uppercase tracking-wider">
+              <p className="text-[10px] text-white/40 mt-2 font-semibold font-mono uppercase tracking-[0.1em]">
                 {card.title}
               </p>
             </div>
@@ -151,54 +153,54 @@ export default function DashboardPage() {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         <Link href="/generate" className="group">
-          <div className="glass glass-hover p-6 flex items-center gap-4 cursor-pointer transition-all duration-200">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#00ff88]/8 border border-[#00ff88]/12">
-              <Sparkles className="h-6 w-6 text-[#00ff88]/70" />
+          <div className="glass glass-hover p-7 flex items-center gap-5 cursor-pointer">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#00ff88]/8 border border-[#00ff88]/12 group-hover:border-[#00ff88]/25 group-hover:shadow-[0_0_20px_rgba(0,255,136,0.08)] transition-all duration-300">
+              <Sparkles className="h-6 w-6 text-[#00ff88]/60 group-hover:text-[#00ff88] transition-colors duration-300" />
             </div>
             <div className="flex-1">
-              <h3 className="font-semibold text-white group-hover:text-[#00ff88] transition-colors duration-200 heading-brutal">
+              <h3 className="font-bold text-white group-hover:text-[#00ff88] transition-colors duration-300 heading-brutal text-[15px]">
                 Generate Content
               </h3>
-              <p className="text-sm text-white/35 mt-0.5">
+              <p className="text-sm text-white/40 mt-1">
                 AI-powered content creation
               </p>
             </div>
-            <ArrowUpRight className="h-5 w-5 text-white/20 group-hover:text-[#00ff88] transition-all duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+            <ArrowUpRight className="h-5 w-5 text-white/15 group-hover:text-[#00ff88] transition-all duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
           </div>
         </Link>
         <Link href="/calendar" className="group">
-          <div className="glass glass-hover p-6 flex items-center gap-4 cursor-pointer transition-all duration-200">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#00ff88]/8 border border-[#00ff88]/12">
-              <Calendar className="h-6 w-6 text-[#00ff88]/70" />
+          <div className="glass glass-hover p-7 flex items-center gap-5 cursor-pointer">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#00d4ff]/8 border border-[#00d4ff]/12 group-hover:border-[#00d4ff]/25 group-hover:shadow-[0_0_20px_rgba(0,212,255,0.08)] transition-all duration-300">
+              <Calendar className="h-6 w-6 text-[#00d4ff]/60 group-hover:text-[#00d4ff] transition-colors duration-300" />
             </div>
             <div className="flex-1">
-              <h3 className="font-semibold text-white group-hover:text-[#00ff88] transition-colors duration-200 heading-brutal">
+              <h3 className="font-bold text-white group-hover:text-[#00d4ff] transition-colors duration-300 heading-brutal text-[15px]">
                 View Calendar
               </h3>
-              <p className="text-sm text-white/35 mt-0.5">
+              <p className="text-sm text-white/40 mt-1">
                 Plan and schedule content
               </p>
             </div>
-            <ArrowUpRight className="h-5 w-5 text-white/20 group-hover:text-[#00ff88] transition-all duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+            <ArrowUpRight className="h-5 w-5 text-white/15 group-hover:text-[#00d4ff] transition-all duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
           </div>
         </Link>
       </div>
 
       {/* Recent Content */}
       <div className="glass overflow-hidden">
-        <div className="px-6 py-4 border-b border-white/[0.06]">
+        <div className="px-7 py-5 border-b border-white/[0.06]">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <BarChart3 className="h-4 w-4 text-white/25" />
-              <h2 className="text-base font-semibold text-white heading-brutal">
+            <div className="flex items-center gap-3">
+              <BarChart3 className="h-4 w-4 text-[#00d4ff]/50" />
+              <h2 className="text-base font-bold text-white heading-brutal">
                 Recent Content
               </h2>
             </div>
             <Link
               href="/content"
-              className="text-xs text-[#00ff88]/70 hover:text-[#00ff88] transition-colors font-medium font-mono"
+              className="text-xs text-[#00ff88]/60 hover:text-[#00ff88] transition-colors duration-300 font-semibold font-mono"
             >
               View all →
             </Link>
@@ -206,7 +208,7 @@ export default function DashboardPage() {
         </div>
         <div>
           {loading ? (
-            <div className="p-6 space-y-4">
+            <div className="p-7 space-y-4">
               {[1, 2, 3].map((i) => (
                 <div key={i} className="flex items-center gap-4">
                   <Skeleton className="h-4 flex-1 bg-white/[0.04]" />
@@ -216,35 +218,31 @@ export default function DashboardPage() {
               ))}
             </div>
           ) : recentContent.length === 0 ? (
-            <div className="p-16 text-center">
-              <FileText className="h-12 w-12 text-white/10 mx-auto mb-3" />
-              <p className="text-sm text-white/40 font-medium">
+            <div className="p-20 text-center">
+              <FileText className="h-14 w-14 text-white/8 mx-auto mb-4" />
+              <p className="text-sm text-white/45 font-medium">
                 No content pieces yet
               </p>
-              <p className="text-xs text-white/20 mt-1">
+              <p className="text-xs text-white/25 mt-2">
                 Start by generating your first piece of content
               </p>
               <Link href="/generate">
-                <Button className="mt-5 bg-[#00ff88] hover:bg-[#00cc6a] text-[#050505] text-sm font-semibold transition-all duration-200 glow-sm hover:scale-[1.02]">
+                <Button className="mt-6 bg-[#00ff88] hover:bg-[#00cc6a] text-[#0a0a1a] text-sm font-bold transition-all duration-300 glow-sm hover:scale-[1.03] shadow-[0_0_20px_rgba(0,255,136,0.2)]">
                   <Sparkles className="h-4 w-4 mr-2" />
                   Generate Content
                 </Button>
               </Link>
             </div>
           ) : (
-            <Table>
+            <Table className="table-premium">
               <TableHeader>
-                <TableRow className="border-white/[0.04] hover:bg-transparent">
-                  <TableHead className="text-white/30 text-xs font-medium font-mono uppercase tracking-wider">
-                    Title
-                  </TableHead>
-                  <TableHead className="text-white/30 text-xs font-medium font-mono uppercase tracking-wider hidden sm:table-cell">
+                <TableRow className="border-white/[0.06] hover:bg-transparent">
+                  <TableHead>Title</TableHead>
+                  <TableHead className="hidden sm:table-cell">
                     Platform
                   </TableHead>
-                  <TableHead className="text-white/30 text-xs font-medium font-mono uppercase tracking-wider">
-                    Status
-                  </TableHead>
-                  <TableHead className="text-white/30 text-xs font-medium font-mono uppercase tracking-wider hidden md:table-cell">
+                  <TableHead>Status</TableHead>
+                  <TableHead className="hidden md:table-cell">
                     Date
                   </TableHead>
                 </TableRow>
@@ -253,18 +251,18 @@ export default function DashboardPage() {
                 {recentContent.map((piece) => (
                   <TableRow
                     key={piece.id}
-                    className="border-white/[0.04] hover:bg-white/[0.02] transition-all duration-200"
+                    className="border-white/[0.04] hover:bg-white/[0.02] transition-all duration-300"
                   >
                     <TableCell className="font-medium text-white text-sm">
                       {piece.title || "Untitled"}
                     </TableCell>
-                    <TableCell className="text-white/40 text-sm hidden sm:table-cell capitalize">
+                    <TableCell className="text-white/50 text-sm hidden sm:table-cell capitalize">
                       {piece.platform || "—"}
                     </TableCell>
                     <TableCell>
                       <Badge
                         variant="outline"
-                        className={`text-[10px] font-medium capitalize border font-mono ${
+                        className={`text-[10px] font-semibold capitalize border font-mono ${
                           statusColors[piece.status] ||
                           "bg-white/5 text-white/40 border-white/10"
                         }`}
@@ -272,7 +270,7 @@ export default function DashboardPage() {
                         {piece.status}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-white/25 text-xs hidden md:table-cell">
+                    <TableCell className="text-white/30 text-xs hidden md:table-cell font-mono">
                       {piece.created_at
                         ? new Date(piece.created_at).toLocaleDateString(
                             "en-US",
