@@ -11,6 +11,7 @@ import {
   Settings,
   Building2,
   Loader2,
+  LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -35,24 +36,48 @@ export default function DashboardLayout({
   const router = useRouter();
   const [checkingBrand, setCheckingBrand] = useState(true);
 
+  const handleLogout = async () => {
+    try {
+      const res = await fetch("/api/auth/logout", { method: "POST" });
+      if (res.ok) {
+        router.push("/login");
+      }
+    } catch (err) {
+      console.error("Logout failed:", err);
+    }
+  };
+
   useEffect(() => {
-    async function checkBrand() {
+    async function checkSecurityAndBrand() {
       try {
-        const res = await fetch("/api/brands");
-        if (res.ok) {
-          const brands = await res.json();
+        // 1. Check Auth Session
+        const authRes = await fetch("/api/auth/session");
+        if (!authRes.ok) {
+          router.push("/login");
+          return;
+        }
+        const authData = await authRes.json();
+        if (!authData.authenticated) {
+          router.push("/login");
+          return;
+        }
+
+        // 2. Check Brand onboarding
+        const brandRes = await fetch("/api/brands");
+        if (brandRes.ok) {
+          const brands = await brandRes.json();
           if (!brands || brands.length === 0) {
             router.push("/onboarding");
             return;
           }
         }
       } catch (err) {
-        console.error("Error checking brand existence:", err);
+        console.error("Error in layout verification:", err);
       } finally {
         setCheckingBrand(false);
       }
     }
-    checkBrand();
+    checkSecurityAndBrand();
   }, [router]);
 
   return (
@@ -123,6 +148,13 @@ export default function DashboardLayout({
               </Link>
             );
           })}
+          <button
+            onClick={handleLogout}
+            className="w-full nav-link text-left text-red-400 hover:text-red-300 hover:bg-red-500/10 cursor-pointer flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-xl transition-all duration-300"
+          >
+            <LogOut className="h-[18px] w-[18px] shrink-0" />
+            Cerrar Sesión
+          </button>
         </div>
       </aside>
 

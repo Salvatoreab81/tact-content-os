@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   Check,
@@ -98,6 +98,44 @@ export default function OnboardingPage() {
     platforms: [] as string[],
     contentVerticals: [] as string[],
   });
+
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
+  useEffect(() => {
+    async function verifyAuth() {
+      try {
+        const res = await fetch("/api/auth/session");
+        if (res.ok) {
+          const data = await res.json();
+          if (!data.authenticated) {
+            router.push("/login");
+            return;
+          }
+        } else {
+          router.push("/login");
+          return;
+        }
+      } catch (err) {
+        console.error("Auth check failed:", err);
+        router.push("/login");
+        return;
+      } finally {
+        setCheckingAuth(false);
+      }
+    }
+    verifyAuth();
+  }, [router]);
+
+  if (checkingAuth) {
+    return (
+      <div className="flex h-screen w-screen items-center justify-center bg-[#0a0a1a] text-white">
+        <div className="flex flex-col items-center gap-3">
+          <span className="h-8 w-8 animate-spin rounded-full border-2 border-t-transparent border-[#00ff88]" />
+          <p className="text-xs font-mono text-white/40">Securing workspace...</p>
+        </div>
+      </div>
+    );
+  }
 
   const updateForm = (patch: Partial<typeof form>) =>
     setForm((prev) => ({ ...prev, ...patch }));

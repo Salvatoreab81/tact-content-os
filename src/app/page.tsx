@@ -1,9 +1,17 @@
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import { query } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
+  const cookieStore = await cookies();
+  const session = cookieStore.get("tact_session");
+  
+  if (!session || session.value !== "authenticated") {
+    redirect("/login");
+  }
+
   let count = 0;
   let dbError = null;
 
