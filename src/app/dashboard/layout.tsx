@@ -1,7 +1,8 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   Calendar,
@@ -9,6 +10,7 @@ import {
   Sparkles,
   Settings,
   Building2,
+  Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -30,6 +32,28 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const [checkingBrand, setCheckingBrand] = useState(true);
+
+  useEffect(() => {
+    async function checkBrand() {
+      try {
+        const res = await fetch("/api/brands");
+        if (res.ok) {
+          const brands = await res.json();
+          if (!brands || brands.length === 0) {
+            router.push("/onboarding");
+            return;
+          }
+        }
+      } catch (err) {
+        console.error("Error checking brand existence:", err);
+      } finally {
+        setCheckingBrand(false);
+      }
+    }
+    checkBrand();
+  }, [router]);
 
   return (
     <div className="flex h-screen overflow-hidden">
@@ -57,7 +81,9 @@ export default function DashboardLayout({
         <nav className="flex-1 px-4 py-5 space-y-1">
           {navItems.map((item) => {
             const isActive =
-              pathname === item.href || pathname.startsWith(item.href + "/");
+              item.href === "/dashboard"
+                ? pathname === "/dashboard"
+                : pathname === item.href || pathname.startsWith(item.href + "/");
             return (
               <Link
                 key={item.href}
@@ -103,7 +129,15 @@ export default function DashboardLayout({
       {/* Main content area */}
       <div className="flex flex-col flex-1 min-w-0">
         {/* Main content */}
-        <main className="flex-1 overflow-y-auto grid-bg">{children}</main>
+        <main className="flex-1 overflow-y-auto grid-bg">
+          {checkingBrand ? (
+            <div className="flex h-full w-full items-center justify-center">
+              <Loader2 className="h-8 w-8 animate-spin text-[#00ff88]" />
+            </div>
+          ) : (
+            children
+          )}
+        </main>
       </div>
     </div>
   );
