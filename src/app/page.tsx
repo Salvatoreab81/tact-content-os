@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
 import { query } from "@/lib/db";
 
+export const dynamic = "force-dynamic";
+
 export default async function Home() {
   let count = 0;
   let dbError = null;
