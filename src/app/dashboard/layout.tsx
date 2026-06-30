@@ -6,22 +6,22 @@ import {
   LayoutDashboard,
   Calendar,
   FileText,
-  Megaphone,
   Sparkles,
   Settings,
+  Building2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/calendar", label: "Calendar", icon: Calendar },
-  { href: "/content", label: "Content", icon: FileText },
-  { href: "/campaigns", label: "Campaigns", icon: Megaphone },
-  { href: "/generate", label: "Generate", icon: Sparkles },
+  { href: "/dashboard/calendar", label: "Calendar", icon: Calendar },
+  { href: "/dashboard/content", label: "Content", icon: FileText },
+  { href: "/dashboard/brand", label: "Brand", icon: Building2 },
+  { href: "/dashboard/generate", label: "Generate", icon: Sparkles },
 ];
 
 const bottomItems = [
-  { href: "/settings", label: "Settings", icon: Settings },
+  { href: "/dashboard/settings", label: "Settings", icon: Settings },
 ];
 
 export default function DashboardLayout({
@@ -34,7 +34,7 @@ export default function DashboardLayout({
   return (
     <div className="flex h-screen overflow-hidden">
       {/* Sidebar */}
-      <aside className="hidden lg:flex w-64 flex-col glass-sidebar">
+      <aside className="flex w-64 flex-col glass-sidebar shrink-0">
         {/* Logo */}
         <div className="flex items-center gap-3 px-6 py-6">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#00ff88]/10 border border-[#00ff88]/25 text-[#00ff88] font-bold text-sm shadow-[0_0_24px_rgba(0,255,136,0.12)] transition-all duration-300 hover:shadow-[0_0_32px_rgba(0,255,136,0.2)] hover:scale-105">
@@ -100,41 +100,8 @@ export default function DashboardLayout({
         </div>
       </aside>
 
-      {/* Mobile header */}
+      {/* Main content area */}
       <div className="flex flex-col flex-1 min-w-0">
-        <header className="flex items-center justify-between border-b border-white/[0.08] bg-[#0a0a1a]/80 backdrop-blur-xl px-4 py-3 lg:hidden sticky top-0 z-50">
-          <div className="flex items-center gap-3">
-            <Link href="/dashboard" className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#00ff88]/10 border border-[#00ff88]/25 text-[#00ff88] font-bold text-xs shadow-[0_0_16px_rgba(0,255,136,0.1)]">
-                T
-              </div>
-              <span className="font-bold text-sm heading-brutal">TACT</span>
-            </Link>
-          </div>
-          {/* Mobile bottom nav */}
-          <div className="flex items-center gap-1">
-            {navItems.slice(0, 5).map((item) => {
-              const isActive =
-                pathname === item.href || pathname.startsWith(item.href + "/");
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={cn(
-                    "flex flex-col items-center gap-1 rounded-lg px-3 py-1.5 text-[10px] font-medium transition-all duration-300",
-                    isActive
-                      ? "text-[#00ff88]"
-                      : "text-white/30 hover:text-white/60"
-                  )}
-                >
-                  <item.icon className="h-4 w-4" />
-                  {item.label}
-                </Link>
-              );
-            })}
-          </div>
-        </header>
-
         {/* Main content */}
         <main className="flex-1 overflow-y-auto grid-bg">{children}</main>
       </div>

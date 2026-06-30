@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Sparkles,
   Send,
@@ -62,16 +62,91 @@ export default function GeneratePage() {
     topic: "",
   });
   const [generating, setGenerating] = useState(false);
-  const [generated, setGenerated] = useState<typeof sampleGenerated>([]);
+  const [generated, setGenerated] = useState<any[]>([]);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+  const [campaigns, setCampaigns] = useState<any[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [publishingIndex, setPublishingIndex] = useState<number | null>(null);
+  const [publishedIndices, setPublishedIndices] = useState<number[]>([]);
+
+  useEffect(() => {
+    async function fetchCampaigns() {
+      try {
+        const res = await fetch("/api/campaigns");
+        if (res.ok) {
+          const data = await res.json();
+          setCampaigns(data.campaigns || data || []);
+        }
+      } catch (err) {
+        console.error("Error loading campaigns:", err);
+      }
+    }
+    fetchCampaigns();
+  }, []);
 
   const handleGenerate = async () => {
     setGenerating(true);
     setGenerated([]);
-    // Simulate AI generation
-    await new Promise((r) => setTimeout(r, 2000));
-    setGenerated(sampleGenerated);
-    setGenerating(false);
+    setError(null);
+    setPublishedIndices([]);
+
+    const model = localStorage.getItem("tact_openrouter_model") || "google/gemini-2.0-flash-exp:free";
+
+    try {
+      const res = await fetch("/api/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          platform: form.platform,
+          vertical: form.vertical,
+          topic: form.topic,
+          model: model
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setGenerated(Array.isArray(data) ? data : [data]);
+      } else {
+        const errorData = await res.json().catch(() => ({}));
+        setError(errorData.error || "Failed to generate content. Please verify your OpenRouter API key.");
+      }
+    } catch (err) {
+      console.error("Error calling generate api:", err);
+      setError("Network error calling generation service.");
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  const handlePublish = async (item: any, index: number) => {
+    setPublishingIndex(index);
+    try {
+      const res = await fetch("/api/content", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          brandId: "1",
+          campaignId: form.campaign || null,
+          platform: form.platform || item.type?.toLowerCase().split(" ")[0] || "instagram",
+          contentType: item.type || "Post",
+          contentVertical: form.vertical || "General",
+          title: item.title,
+          caption: item.caption,
+          scheduled_date: new Date().toLocaleDateString("sv-SE"), // YYYY-MM-DD local format
+        }),
+      });
+
+      if (res.ok) {
+        setPublishedIndices((prev) => [...prev, index]);
+      } else {
+        alert("Failed to save content piece to database.");
+      }
+    } catch (err) {
+      console.error("Error publishing content:", err);
+    } finally {
+      setPublishingIndex(null);
+    }
   };
 
   const handleCopy = (text: string, index: number) => {
@@ -113,10 +188,11 @@ export default function GeneratePage() {
               className="w-full rounded-xl glass-select px-3 py-2.5 text-sm cursor-pointer"
             >
               <option value="">Select campaign</option>
-              <option value="summer">Summer Collection</option>
-              <option value="holiday">Holiday Campaign</option>
-              <option value="brand">Brand Awareness</option>
-              <option value="product">Product Launch</option>
+              {campaigns.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -198,6 +274,13 @@ export default function GeneratePage() {
 
         {/* Preview */}
         <div className="lg:col-span-3 space-y-5">
+          {error && (
+            <div className="glass p-5 border border-red-500/20 rounded-xl bg-red-500/5">
+              <p className="text-sm font-bold text-red-400">Generation Error</p>
+              <p className="text-xs text-white/60 mt-1">{error}</p>
+            </div>
+          )}
+
           {generating && (
             <div className="glass p-14 text-center">
               <div className="flex flex-col items-center gap-5">
@@ -302,10 +385,30 @@ export default function GeneratePage() {
                     </Button>
                     <Button
                       size="sm"
-                      className="text-xs bg-[#00ff88]/10 text-[#00ff88] hover:bg-[#00ff88]/15 h-8 border-0 font-mono transition-all duration-300 rounded-xl"
+                      onClick={() => handlePublish(item, i)}
+                      disabled={publishedIndices.includes(i) || publishingIndex === i}
+                      className={`text-xs h-8 border-0 font-mono transition-all duration-300 rounded-xl ${
+                        publishedIndices.includes(i)
+                          ? "bg-[#00d4ff]/10 text-[#00d4ff] cursor-default"
+                          : "bg-[#00ff88]/10 text-[#00ff88] hover:bg-[#00ff88]/15"
+                      }`}
                     >
-                      <Send className="h-3 w-3 mr-1" />
-                      Publish
+                      {publishingIndex === i ? (
+                        <>
+                          <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                          Publishing...
+                        </>
+                      ) : publishedIndices.includes(i) ? (
+                        <>
+                          <Check className="h-3 w-3 mr-1" />
+                          Published
+                        </>
+                      ) : (
+                        <>
+                          <Send className="h-3 w-3 mr-1" />
+                          Publish
+                        </>
+                      )}
                     </Button>
                   </div>
                 </div>

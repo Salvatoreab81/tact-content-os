@@ -154,7 +154,7 @@ export default function DashboardPage() {
 
       {/* Quick Actions */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-        <Link href="/generate" className="group">
+        <Link href="/dashboard/generate" className="group">
           <div className="glass glass-hover p-7 flex items-center gap-5 cursor-pointer">
             <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#00ff88]/8 border border-[#00ff88]/12 group-hover:border-[#00ff88]/25 group-hover:shadow-[0_0_20px_rgba(0,255,136,0.08)] transition-all duration-300">
               <Sparkles className="h-6 w-6 text-[#00ff88]/60 group-hover:text-[#00ff88] transition-colors duration-300" />
@@ -170,7 +170,7 @@ export default function DashboardPage() {
             <ArrowUpRight className="h-5 w-5 text-white/15 group-hover:text-[#00ff88] transition-all duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
           </div>
         </Link>
-        <Link href="/calendar" className="group">
+        <Link href="/dashboard/calendar" className="group">
           <div className="glass glass-hover p-7 flex items-center gap-5 cursor-pointer">
             <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#00d4ff]/8 border border-[#00d4ff]/12 group-hover:border-[#00d4ff]/25 group-hover:shadow-[0_0_20px_rgba(0,212,255,0.08)] transition-all duration-300">
               <Calendar className="h-6 w-6 text-[#00d4ff]/60 group-hover:text-[#00d4ff] transition-colors duration-300" />
@@ -199,7 +199,7 @@ export default function DashboardPage() {
               </h2>
             </div>
             <Link
-              href="/content"
+              href="/dashboard/content"
               className="text-xs text-[#00ff88]/60 hover:text-[#00ff88] transition-colors duration-300 font-semibold font-mono"
             >
               View all →
@@ -226,7 +226,7 @@ export default function DashboardPage() {
               <p className="text-xs text-white/25 mt-2">
                 Start by generating your first piece of content
               </p>
-              <Link href="/generate">
+              <Link href="/dashboard/generate">
                 <Button className="mt-6 bg-[#00ff88] hover:bg-[#00cc6a] text-[#0a0a1a] text-sm font-bold transition-all duration-300 glow-sm hover:scale-[1.03] shadow-[0_0_20px_rgba(0,255,136,0.2)]">
                   <Sparkles className="h-4 w-4 mr-2" />
                   Generate Content

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getBrand } from "@/lib/db";
+import { getBrand, updateBrand } from "@/lib/db";
 
 export async function GET(
   request: NextRequest,
@@ -19,3 +19,25 @@ export async function GET(
     );
   }
 }
+
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Promise<{ slug: string }> }
+) {
+  try {
+    const { slug } = await params;
+    const body = await request.json();
+    const brand = await getBrand(slug);
+    if (!brand) {
+      return NextResponse.json({ error: "Brand not found" }, { status: 404 });
+    }
+    const updatedBrand = await updateBrand(brand.id, body);
+    return NextResponse.json(updatedBrand);
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Failed to update brand" },
+      { status: 500 }
+    );
+  }
+}
+

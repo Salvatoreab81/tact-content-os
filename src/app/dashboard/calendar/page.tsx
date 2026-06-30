@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   ChevronLeft,
   ChevronRight,
@@ -53,6 +53,7 @@ export default function CalendarPage() {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [loadingEvents, setLoadingEvents] = useState(false);
   const [newEvent, setNewEvent] = useState({
     title: "",
     event_date: "",
@@ -63,38 +64,22 @@ export default function CalendarPage() {
   const currentMonth = new Date().getMonth();
   const [viewMonth, setViewMonth] = useState(currentMonth);
 
-  // Generate sample events for demo
-  useMemo(() => {
-    const sampleEvents: CalendarEvent[] = [];
-    const titles = [
-      "Product Launch Campaign",
-      "Holiday Sale Content",
-      "Brand Awareness Week",
-      "Summer Collection",
-      "Black Friday Campaign",
-      "New Year Promotion",
-      "Back to School",
-      "Valentine's Day",
-      "Pet Appreciation Day",
-    ];
-    const types = ["campaign", "event", "holiday", "promotion"];
-    const efforts = ["low", "medium", "high"];
-
-    for (let m = 0; m < 12; m++) {
-      const daysInMonth = new Date(year, m + 1, 0).getDate();
-      const numEvents = Math.floor(Math.random() * 3) + 1;
-      for (let e = 0; e < numEvents; e++) {
-        const day = Math.floor(Math.random() * daysInMonth) + 1;
-        sampleEvents.push({
-          id: m * 10 + e,
-          title: titles[Math.floor(Math.random() * titles.length)],
-          event_date: `${year}-${String(m + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`,
-          event_type: types[Math.floor(Math.random() * types.length)],
-          effort_level: efforts[Math.floor(Math.random() * efforts.length)],
-        });
+  useEffect(() => {
+    async function fetchEvents() {
+      setLoadingEvents(true);
+      try {
+        const res = await fetch(`/api/calendar?year=${year}`);
+        if (res.ok) {
+          const data = await res.json();
+          setEvents(data.events || []);
+        }
+      } catch (err) {
+        console.error("Error fetching calendar events:", err);
+      } finally {
+        setLoadingEvents(false);
       }
     }
-    setEvents(sampleEvents);
+    fetchEvents();
   }, [year]);
 
   const daysInMonth = new Date(year, viewMonth + 1, 0).getDate();
@@ -116,19 +101,36 @@ export default function CalendarPage() {
     ? events.filter((e) => e.event_date === selectedDate)
     : [];
 
-  const addEvent = () => {
+  const addEvent = async () => {
     if (!newEvent.title || !newEvent.event_date) return;
-    setEvents((prev) => [
-      ...prev,
-      { ...newEvent, id: Date.now() } as CalendarEvent,
-    ]);
-    setNewEvent({
-      title: "",
-      event_date: "",
-      event_type: "campaign",
-      effort_level: "medium",
-    });
-    setShowAddForm(false);
+    try {
+      const res = await fetch("/api/calendar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          brandId: "1",
+          title: newEvent.title,
+          event_date: newEvent.event_date,
+          event_type: newEvent.event_type,
+          effort_level: newEvent.effort_level,
+        }),
+      });
+      if (res.ok) {
+        const savedEvent = await res.json();
+        setEvents((prev) => [...prev, savedEvent]);
+        setNewEvent({
+          title: "",
+          event_date: "",
+          event_type: "campaign",
+          effort_level: "medium",
+        });
+        setShowAddForm(false);
+      } else {
+        alert("Failed to save event to database.");
+      }
+    } catch (err) {
+      console.error("Error creating calendar event:", err);
+    }
   };
 
   return (
