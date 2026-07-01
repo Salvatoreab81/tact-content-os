@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { brandName, industry, targetAudience, presets, model } = body;
+    const { brandName, industry, targetAudience, presets, model, apiKey: userApiKey } = body;
 
     if (!brandName || !industry) {
       return NextResponse.json(
@@ -12,10 +12,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const apiKey = process.env.OPENROUTER_API_KEY;
+    const apiKey = userApiKey || process.env.OPENROUTER_API_KEY;
     if (!apiKey) {
       return NextResponse.json(
-        { error: "OPENROUTER_API_KEY is not configured in environment variables." },
+        { error: "OpenRouter API Key is not configured. Please supply one in Onboarding or set OPENROUTER_API_KEY in the environment." },
         { status: 500 }
       );
     }

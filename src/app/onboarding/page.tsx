@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
+  Key,
   Check,
   ChevronRight,
   ChevronLeft,
@@ -40,6 +41,7 @@ const XIcon = (props: any) => (
 );
 
 const STEPS = [
+  { title: "API & Model Setup", icon: Key },
   { title: "Brand Basics", icon: Building2 },
   { title: "Target Audience", icon: Globe },
   { title: "Platforms & Formats", icon: Layers },
@@ -259,7 +261,14 @@ const TRANSLATIONS = {
     tellUsBrand: "Tell us about your brand to get personalized content",
     step: "Step",
     of: "of",
-    // Step 0: Basics
+    // Step 0: API & Model Setup
+    apiSetup: "API & Model Setup",
+    apiSetupDesc: "Configure your OpenRouter API settings and select your preferred AI model.",
+    openrouterApiKey: "OpenRouter API Key (Optional)",
+    openrouterApiKeyDesc: "If left blank, TACT will default to the server's configured key.",
+    selectModel: "Preferred AI Model *",
+    selectModelDesc: "Choose the model that TACT will use for strategic suggestions, copywriting, and audit analysis.",
+    modelRecommended: "Recommended: Gemini 2.0 Flash is fast and highly available.",
     brandBasics: "Brand Basics",
     startBasics: "Start with your brand's core information",
     brandName: "Brand Name *",
@@ -315,7 +324,14 @@ const TRANSLATIONS = {
     tellUsBrand: "Cuéntanos sobre tu marca para recibir contenido personalizado",
     step: "Paso",
     of: "de",
-    // Step 0: Basics
+    // Step 0: API & Model Setup
+    apiSetup: "Configuración de API y Modelos",
+    apiSetupDesc: "Configura tus credenciales de OpenRouter y selecciona tu modelo de IA de preferencia.",
+    openrouterApiKey: "Clave API de OpenRouter (Opcional)",
+    openrouterApiKeyDesc: "Si se deja en blanco, TACT utilizará la clave configurada en el servidor.",
+    selectModel: "Modelo de IA Preferido *",
+    selectModelDesc: "Selecciona el cerebro de IA que utilizará TACT para sugerencias de marca, redacción y auditorías.",
+    modelRecommended: "Recomendado: Gemini 2.0 Flash es rápido y altamente disponible.",
     brandBasics: "Datos Básicos de Marca",
     startBasics: "Comienza con la información principal de tu marca",
     brandName: "Nombre de la Marca *",
@@ -405,6 +421,8 @@ export default function OnboardingPage() {
   };
 
   const [form, setForm] = useState({
+    openrouterApiKey: "",
+    openrouterModel: "google/gemini-2.0-flash",
     name: "",
     slug: "",
     industry: "",
@@ -483,6 +501,8 @@ export default function OnboardingPage() {
             setIsEditing(true);
             setExistingSlug(b.slug);
             setForm({
+              openrouterApiKey: b.openrouter_api_key || b.openrouterApiKey || "",
+              openrouterModel: b.openrouter_model || b.openrouterModel || "google/gemini-2.0-flash",
               name: b.name || "",
               slug: b.slug || "",
               industry: b.industry || "",
@@ -638,6 +658,8 @@ export default function OnboardingPage() {
           industry: form.industry,
           targetAudience: form.targetAudience,
           presets: ["divertido", "de lujo", "educativo", "profesional", "humorístico"],
+          apiKey: form.openrouterApiKey,
+          model: form.openrouterModel,
         }),
       });
 
@@ -673,7 +695,9 @@ export default function OnboardingPage() {
             ...form.targetAudience,
             markets: form.targetAudience.countries.length ? form.targetAudience.countries : form.targetAudience.regions
           },
-          platformDetails: form.platformDetails
+          platformDetails: form.platformDetails,
+          apiKey: form.openrouterApiKey,
+          model: form.openrouterModel,
         }),
       });
 
@@ -744,15 +768,17 @@ export default function OnboardingPage() {
 
   const canProceed = () => {
     switch (step) {
-      case 0:
+      case 0: // API & Model Setup: always allowed since key is optional and model has default
+        return true;
+      case 1: // Brand Basics
         return form.name.trim().length > 0 && form.industry.trim().length > 0;
-      case 1: // Target Audience: Need regions and generations
+      case 2: // Target Audience: Need regions and generations
         return form.targetAudience.regions.length > 0 && form.targetAudience.generations.length > 0;
-      case 2: // Platforms & Formats
+      case 3: // Platforms & Formats
         return form.platforms.length > 0;
-      case 3: // Content Verticals
+      case 4: // Content Verticals
         return form.contentVerticals.length > 0;
-      case 4: // Tone of Voice
+      case 5: // Tone of Voice
         return form.toneOfVoice.trim().length > 0;
       default:
         return true;
@@ -965,8 +991,59 @@ export default function OnboardingPage() {
         {/* Step content */}
         <div className="glass glass-accent-top p-7 sm:p-9">
           
-          {/* Step 0: Brand Basics */}
+          {/* Step 0: API & Model Setup */}
           {step === 0 && (
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-lg font-bold text-white mb-1 heading-brutal">
+                  {t("apiSetup")}
+                </h2>
+                <p className="text-xs text-white/40">
+                  {t("apiSetupDesc")}
+                </p>
+              </div>
+
+              <div className="space-y-5">
+                <div>
+                  <label className="block form-label mb-1.5">{t("openrouterApiKey")}</label>
+                  <Input
+                    type="password"
+                    placeholder="sk-or-v1-..."
+                    value={form.openrouterApiKey}
+                    onChange={(e) => updateForm({ openrouterApiKey: e.target.value })}
+                    className="glass-input h-10 text-xs font-mono"
+                  />
+                  <p className="text-[10px] text-white/30 mt-1 leading-normal">
+                    {t("openrouterApiKeyDesc")}
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block form-label mb-1.5">{t("selectModel")}</label>
+                  <select
+                    value={form.openrouterModel}
+                    onChange={(e) => updateForm({ openrouterModel: e.target.value })}
+                    className="glass-input w-full h-10 px-3 text-xs bg-black/40 border border-white/[0.08] text-white/80 rounded-xl focus:border-[#00ff88]/50 focus:outline-none transition-all duration-300"
+                  >
+                    <option value="google/gemini-2.0-flash" className="bg-neutral-900 text-white">Google Gemini 2.0 Flash (Recommended)</option>
+                    <option value="google/gemini-2.5-flash" className="bg-neutral-900 text-white">Google Gemini 2.5 Flash</option>
+                    <option value="meta-llama/llama-3.3-70b-instruct" className="bg-neutral-900 text-white">Llama 3.3 70B Instruct</option>
+                    <option value="anthropic/claude-3.5-sonnet" className="bg-neutral-900 text-white">Claude 3.5 Sonnet</option>
+                    <option value="openai/gpt-4o-mini" className="bg-neutral-900 text-white">GPT-4o Mini</option>
+                  </select>
+                  <p className="text-[10px] text-white/30 mt-1 leading-normal">
+                    {t("selectModelDesc")}
+                  </p>
+                  <p className="text-[10px] text-[#00ff88]/60 mt-1 font-mono">
+                    {t("modelRecommended")}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Step 1: Brand Basics */}
+          {step === 1 && (
             <div className="space-y-6">
               <div>
                 <h2 className="text-lg font-bold text-white mb-1 heading-brutal">
@@ -1016,8 +1093,8 @@ export default function OnboardingPage() {
             </div>
           )}
 
-          {/* Step 1: Target Audience */}
-          {step === 1 && (
+          {/* Step 2: Target Audience */}
+          {step === 2 && (
             <div className="space-y-6">
               <div>
                 <h2 className="text-lg font-bold text-white mb-1 heading-brutal">
@@ -1244,8 +1321,8 @@ export default function OnboardingPage() {
             </div>
           )}
 
-          {/* Step 2: Platforms & Formats */}
-          {step === 2 && (
+          {/* Step 3: Platforms & Formats */}
+          {step === 3 && (
             <div className="space-y-6">
               <div>
                 <h2 className="text-lg font-bold text-white mb-1 heading-brutal">
@@ -1355,8 +1432,8 @@ export default function OnboardingPage() {
             </div>
           )}
 
-          {/* Step 3: Content Verticals */}
-          {step === 3 && (
+          {/* Step 4: Content Verticals */}
+          {step === 4 && (
             <div className="space-y-6">
               <div>
                 <h2 className="text-lg font-bold text-white mb-1 heading-brutal">
@@ -1410,8 +1487,8 @@ export default function OnboardingPage() {
             </div>
           )}
 
-          {/* Step 4: Tone of Voice */}
-          {step === 4 && (
+          {/* Step 5: Tone of Voice */}
+          {step === 5 && (
             <div className="space-y-6">
               <div>
                 <h2 className="text-lg font-bold text-white mb-1 heading-brutal">
@@ -1497,8 +1574,8 @@ export default function OnboardingPage() {
             </div>
           )}
 
-          {/* Step 5: Review & AI Audit */}
-          {step === 5 && (
+          {/* Step 6: Review & AI Audit */}
+          {step === 6 && (
             <div className="space-y-6">
               <div>
                 <h2 className="text-lg font-bold text-white mb-1 heading-brutal">
@@ -1688,7 +1765,7 @@ export default function OnboardingPage() {
             <Button
               type="button"
               onClick={() => setStep((s) => s + 1)}
-              disabled={!canProceed() || (step === 1 && form.targetAudience.socioEconomic.length === 0)}
+              disabled={!canProceed() || (step === 2 && form.targetAudience.socioEconomic.length === 0)}
               className="bg-[#00ff88] hover:bg-[#00cc6a] text-[#0a0a1a] font-bold disabled:opacity-20 disabled:cursor-not-allowed transition-all duration-300 glow-sm hover:scale-[1.02] shadow-[0_0_20px_rgba(0,255,136,0.15)] rounded-xl text-xs"
             >
               {t("continue")}

@@ -250,6 +250,8 @@ export default function BrandGuidelinesPage() {
   const [selectedHistoryVer, setSelectedHistoryVer] = useState<any>(null);
 
   const [form, setForm] = useState({
+    openrouterApiKey: "",
+    openrouterModel: "google/gemini-2.0-flash",
     name: "",
     industry: "",
     toneOfVoice: "",
@@ -314,6 +316,8 @@ export default function BrandGuidelinesPage() {
             const current = brands[0]; // Fetch first brand
             setBrand(current);
             setForm({
+              openrouterApiKey: current.openrouter_api_key || current.openrouterApiKey || "",
+              openrouterModel: current.openrouter_model || current.openrouterModel || "google/gemini-2.0-flash",
               name: current.name || "",
               industry: current.industry || "",
               toneOfVoice: current.tone_of_voice || current.toneOfVoice || "",

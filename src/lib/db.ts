@@ -89,6 +89,10 @@ export async function updateBrand(slug: string, data: any) {
   if (data.target_audience !== undefined) updateData.target_audience = data.target_audience;
   if (data.platformDetails !== undefined) updateData.platform_details = data.platformDetails;
   if (data.platform_details !== undefined) updateData.platform_details = data.platform_details;
+  if (data.openrouterApiKey !== undefined) updateData.openrouter_api_key = data.openrouterApiKey;
+  if (data.openrouter_api_key !== undefined) updateData.openrouter_api_key = data.openrouter_api_key;
+  if (data.openrouterModel !== undefined) updateData.openrouter_model = data.openrouterModel;
+  if (data.openrouter_model !== undefined) updateData.openrouter_model = data.openrouter_model;
 
   await docRef.update(updateData);
   const updatedDoc = await docRef.get();
@@ -145,6 +149,8 @@ export async function restoreBrandVersion(slug: string, versionId: string) {
     platform_details: versionData.platform_details || versionData.platformDetails || null,
     brand_colors: versionData.brand_colors || versionData.brandColors || {},
     brand_fonts: versionData.brand_fonts || versionData.brandFonts || {},
+    openrouter_api_key: versionData.openrouter_api_key || versionData.openrouterApiKey || '',
+    openrouter_model: versionData.openrouter_model || versionData.openrouterModel || 'google/gemini-2.0-flash',
     updated_at: FieldValue.serverTimestamp()
   };
 
@@ -205,6 +211,8 @@ export async function createBrand(data: any) {
     brand_fonts: data.brandFonts || {},
     target_audience: data.targetAudience || data.target_audience || null,
     platform_details: data.platformDetails || data.platform_details || null,
+    openrouter_api_key: data.openrouterApiKey || data.openrouter_api_key || '',
+    openrouter_model: data.openrouterModel || data.openrouter_model || 'google/gemini-2.0-flash',
     created_at: FieldValue.serverTimestamp()
   };
   await ref.set(brandData);
