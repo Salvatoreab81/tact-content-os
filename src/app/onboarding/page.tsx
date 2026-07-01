@@ -1709,6 +1709,7 @@ export default function OnboardingPage() {
                             </div>
                           </div>
                       ))}
+                    </div>
                   </div>
                 ) : (
                   <p className="text-[10px] text-white/40 leading-relaxed font-sans">
