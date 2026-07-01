@@ -93,6 +93,8 @@ export async function updateBrand(slug: string, data: any) {
   if (data.openrouter_api_key !== undefined) updateData.openrouter_api_key = data.openrouter_api_key;
   if (data.openrouterModel !== undefined) updateData.openrouter_model = data.openrouterModel;
   if (data.openrouter_model !== undefined) updateData.openrouter_model = data.openrouter_model;
+  if (data.competitorResearch !== undefined) updateData.competitor_research = data.competitorResearch;
+  if (data.competitor_research !== undefined) updateData.competitor_research = data.competitor_research;
 
   await docRef.update(updateData);
   const updatedDoc = await docRef.get();
@@ -151,6 +153,7 @@ export async function restoreBrandVersion(slug: string, versionId: string) {
     brand_fonts: versionData.brand_fonts || versionData.brandFonts || {},
     openrouter_api_key: versionData.openrouter_api_key || versionData.openrouterApiKey || '',
     openrouter_model: versionData.openrouter_model || versionData.openrouterModel || 'google/gemini-2.0-flash',
+    competitor_research: versionData.competitor_research || versionData.competitorResearch || '',
     updated_at: FieldValue.serverTimestamp()
   };
 
@@ -213,6 +216,7 @@ export async function createBrand(data: any) {
     platform_details: data.platformDetails || data.platform_details || null,
     openrouter_api_key: data.openrouterApiKey || data.openrouter_api_key || '',
     openrouter_model: data.openrouterModel || data.openrouter_model || 'google/gemini-2.0-flash',
+    competitor_research: data.competitorResearch || data.competitor_research || '',
     created_at: FieldValue.serverTimestamp()
   };
   await ref.set(brandData);

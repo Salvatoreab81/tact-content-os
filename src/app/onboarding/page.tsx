@@ -48,6 +48,7 @@ const STEPS = [
   { title: "Content Verticals", icon: Hash },
   { title: "Tone of Voice", icon: MessageSquare },
   { title: "Review & Audit", icon: Send },
+  { title: "Competitor Research", icon: Lightbulb },
 ];
 
 const PLATFORMS = [
@@ -310,6 +311,12 @@ const TRANSLATIONS = {
     auditing: "Auditing...",
     applyChecked: "Apply Checked Audit Adjustments",
     pressAudit: "Press \"Audit Configuration\" to review for audience-channel inconsistencies, target splits, and tone guidelines.",
+    // Step 7: Competitor Research
+    competitorResearchTitle: "Competitor Research",
+    competitorResearchDesc: "Add raw notes about your competitors and let TACT extract insights and angles.",
+    competitorNotesPlaceholder: "Paste competitor URLs, their content strategies, what they do well, what they miss...",
+    analyzeCompetitorsBtn: "AI Analyze Competitors",
+    analyzingCompetitors: "Analyzing...",
     // Navigation
     back: "Back",
     continue: "Continue",
@@ -373,6 +380,12 @@ const TRANSLATIONS = {
     auditing: "Auditando...",
     applyChecked: "Aplicar Ajustes Auditados Seleccionados",
     pressAudit: "Presiona \"Auditar Configuración\" para analizar inconsistencias entre audiencias y canales, splits y tono.",
+    // Step 7: Competitor Research
+    competitorResearchTitle: "Investigación de Competencia",
+    competitorResearchDesc: "Agrega notas sobre tus competidores y deja que TACT extraiga insights y ángulos.",
+    competitorNotesPlaceholder: "Pega URLs de competidores, sus estrategias, qué hacen bien, qué les falta...",
+    analyzeCompetitorsBtn: "Analizar Competencia (IA)",
+    analyzingCompetitors: "Analizando...",
     // Navigation
     back: "Atrás",
     continue: "Continuar",
@@ -397,6 +410,7 @@ export default function OnboardingPage() {
   const [appliedRecommendations, setAppliedRecommendations] = useState<string[]>([]);
   const [excludedCountryInput, setExcludedCountryInput] = useState("");
   const [auditError, setAuditError] = useState("");
+  const [analyzingCompetitors, setAnalyzingCompetitors] = useState(false);
   const [lang, setLang] = useState<"en" | "es">("en");
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null);
 
@@ -438,7 +452,8 @@ export default function OnboardingPage() {
       excludedCountries: [] as string[],
       generations: [] as string[],
     },
-    platformDetails: {} as Record<string, { formats: string[] }>
+    platformDetails: {} as Record<string, { formats: string[] }>,
+    competitorResearch: ""
   });
 
   const parseTargetAudience = (ta: any, marketsFallback: string[]) => {
@@ -511,7 +526,8 @@ export default function OnboardingPage() {
               platforms: b.platforms || [],
               contentVerticals: b.content_verticals || b.contentVerticals || [],
               targetAudience: parseTargetAudience(b.target_audience || b.targetAudience, b.markets || []),
-              platformDetails: b.platform_details || b.platformDetails || {}
+              platformDetails: b.platform_details || b.platformDetails || {},
+              competitorResearch: b.competitor_research || b.competitorResearch || ""
             });
           }
         }
@@ -610,17 +626,6 @@ export default function OnboardingPage() {
       };
     });
   };
-
-  const balanceSocioEconomic = () => {
-    setForm((prev) => ({
-      ...prev,
-      targetAudience: {
-        ...prev.targetAudience,
-        socioEconomic: ["ab", "cplus", "c", "de"]
-      }
-    }));
-  };
-
   const handleAddExcludedCountry = () => {
     if (!excludedCountryInput.trim()) return;
     const value = excludedCountryInput.trim();
@@ -722,37 +727,45 @@ export default function OnboardingPage() {
     }
   };
 
-  const toggleRecommendation = (id: string) => {
-    setAppliedRecommendations((prev) =>
-      prev.includes(id) ? prev.filter((rId) => rId !== id) : [...prev, id]
-    );
-  };
+  const handleApplyRecommendation = (rec: any, action: 'append' | 'overwrite' | 'ignore') => {
+    if (action === 'ignore') {
+      setAuditRecommendations((prev) => prev.filter(r => r.id !== rec.id));
+      return;
+    }
 
-  const applyAuditRecommendations = () => {
     let updatedTone = form.toneOfVoice;
     let updatedPlatforms = [...form.platforms];
     let updatedVerticals = [...form.contentVerticals];
     let updatedDetails = { ...form.platformDetails };
 
-    auditRecommendations.forEach((rec) => {
-      if (!appliedRecommendations.includes(rec.id)) return;
-
-      if (rec.type === "tone" && rec.actionValue) {
-        updatedTone = `${updatedTone} (AI Tune: ${rec.actionValue})`;
-      } else if (rec.type === "platform" && rec.actionValue) {
-        const pId = rec.actionValue.toLowerCase();
-        if (!updatedPlatforms.includes(pId)) {
+    if (rec.type === "tone" && rec.actionValue) {
+      if (action === 'overwrite') {
+        updatedTone = rec.actionValue;
+      } else {
+        updatedTone = updatedTone ? `${updatedTone}\n\n[Sugerencia IA]: ${rec.actionValue}` : rec.actionValue;
+      }
+    } else if (rec.type === "platform" && rec.actionValue) {
+      const pId = rec.actionValue.toLowerCase();
+      if (!updatedPlatforms.includes(pId)) {
+        if (action === 'overwrite') {
+          updatedPlatforms = [pId];
+          updatedDetails = {};
+        } else {
           updatedPlatforms.push(pId);
-          const defaultFormats = PLATFORM_DETAILS_MAP[pId]?.formats.map(f => f.id).slice(0, 2) || [];
-          updatedDetails[pId] = { formats: defaultFormats };
         }
-      } else if (rec.type === "vertical" && rec.actionValue) {
-        const vId = rec.actionValue.toLowerCase();
-        if (!updatedVerticals.includes(vId)) {
+        const defaultFormats = PLATFORM_DETAILS_MAP[pId]?.formats.map(f => f.id).slice(0, 2) || [];
+        updatedDetails[pId] = { formats: defaultFormats };
+      }
+    } else if (rec.type === "vertical" && rec.actionValue) {
+      const vId = rec.actionValue.toLowerCase();
+      if (!updatedVerticals.includes(vId)) {
+        if (action === 'overwrite') {
+          updatedVerticals = [vId];
+        } else {
           updatedVerticals.push(vId);
         }
       }
-    });
+    }
 
     setForm((prev) => ({
       ...prev,
@@ -762,8 +775,41 @@ export default function OnboardingPage() {
       platformDetails: updatedDetails
     }));
 
-    // Reset audit so it doesn't prompt again unless requested
-    setAuditRecommendations([]);
+    setAuditRecommendations((prev) => prev.filter(r => r.id !== rec.id));
+  };
+
+  const handleAnalyzeCompetitors = async () => {
+    if (!form.competitorResearch.trim()) return;
+    setAnalyzingCompetitors(true);
+    try {
+      const res = await fetch("/api/generate/competitors", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: form.name,
+          industry: form.industry,
+          competitorNotes: form.competitorResearch,
+          targetAudience: form.targetAudience,
+          apiKey: form.openrouterApiKey,
+          model: form.openrouterModel,
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.insights) {
+          updateForm({ competitorResearch: form.competitorResearch + "\n\n--- AI Insights ---\n" + data.insights });
+          showToast(lang === "en" ? "Insights added successfully!" : "¡Insights agregados con éxito!", "success");
+        }
+      } else {
+        showToast(lang === "en" ? "Failed to analyze competitors." : "Fallo al analizar la competencia.", "error");
+      }
+    } catch (err) {
+      console.error("Error analyzing competitors:", err);
+      showToast(lang === "en" ? "Network error analyzing competitors." : "Error de red al analizar.", "error");
+    } finally {
+      setAnalyzingCompetitors(false);
+    }
   };
 
   const canProceed = () => {
@@ -780,6 +826,10 @@ export default function OnboardingPage() {
         return form.contentVerticals.length > 0;
       case 5: // Tone of Voice
         return form.toneOfVoice.trim().length > 0;
+      case 6: // Review & Audit
+        return true;
+      case 7: // Competitor Research
+        return true;
       default:
         return true;
     }
@@ -853,7 +903,8 @@ export default function OnboardingPage() {
       lang === "en" ? "Platforms & Formats" : "Plataformas y Formatos",
       lang === "en" ? "Content Verticals" : "Verticales de Contenido",
       lang === "en" ? "Tone of Voice" : "Tono de Voz",
-      lang === "en" ? "Review & Audit" : "Revisión y Auditoría"
+      lang === "en" ? "Review & Audit" : "Revisión y Auditoría",
+      lang === "en" ? "Competitor Research" : "Investigación de Competencia"
     ];
     return { ...s, title: titles[i] };
   });
@@ -1236,13 +1287,6 @@ export default function OnboardingPage() {
               <div className="space-y-3 pt-2">
                 <div className="flex justify-between items-center">
                   <span className="text-[9px] text-white/30 font-semibold font-mono uppercase tracking-[0.15em]">{t("socioEconomicFocus")}</span>
-                  <button
-                    type="button"
-                    onClick={balanceSocioEconomic}
-                    className="text-[9px] font-mono text-purple-400 hover:text-purple-300 underline"
-                  >
-                    {t("selectAll")}
-                  </button>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -1521,7 +1565,7 @@ export default function OnboardingPage() {
                   </Button>
                 </div>
                 <textarea
-                  rows={5}
+                  rows={10}
                   placeholder={
                     lang === "en"
                       ? "e.g., Casual, educational, and direct. We explain complex technical details with simple metaphors and smart humor. We speak directly to professionals..."
@@ -1529,7 +1573,7 @@ export default function OnboardingPage() {
                   }
                   value={form.toneOfVoice}
                   onChange={(e) => updateForm({ toneOfVoice: e.target.value })}
-                  className="w-full rounded-xl glass-input px-4 py-3 text-xs outline-none resize-none"
+                  className="w-full rounded-xl glass-input px-4 py-3 text-xs outline-none resize-y"
                 />
               </div>
               <div>
@@ -1624,40 +1668,47 @@ export default function OnboardingPage() {
                         : "El estratega jefe de TACT analizó tu configuración y te desafía con estas acciones:"}
                     </p>
                     <div className="space-y-2.5">
-                      {auditRecommendations.map((rec) => {
-                        const isChecked = appliedRecommendations.includes(rec.id);
-                        return (
+                      {auditRecommendations.map((rec) => (
                           <div
                             key={rec.id}
-                            onClick={() => toggleRecommendation(rec.id)}
-                            className={`rounded-xl border p-3.5 cursor-pointer text-left transition-all ${
-                              isChecked
-                                ? "bg-purple-500/10 border-purple-500/25"
-                                : "bg-white/[0.01] border-white/[0.04] opacity-50"
-                            }`}
+                            className="rounded-xl border p-4 text-left transition-all bg-white/[0.01] border-white/[0.04]"
                           >
-                            <div className="flex items-center gap-2.5">
-                              <div className={`h-4 w-4 rounded border flex items-center justify-center ${
-                                isChecked ? "bg-purple-500 border-purple-400 text-white" : "border-white/20"
-                              }`}>
-                                {isChecked && <Check className="h-2.5 w-2.5" />}
+                            <div className="flex items-start justify-between gap-4">
+                              <div>
+                                <span className="text-xs font-bold text-white">{rec.title}</span>
+                                <p className="text-[10.5px] text-white/60 mt-1 font-sans leading-relaxed">
+                                  {rec.description}
+                                </p>
+                                <div className="mt-2 text-[10px] font-mono text-[#00ff88]/80 bg-[#00ff88]/10 inline-block px-2 py-0.5 rounded">
+                                  {rec.actionValue}
+                                </div>
                               </div>
-                              <span className="text-xs font-bold text-white">{rec.title}</span>
                             </div>
-                            <p className="text-[10px] text-white/50 mt-1 pl-6.5 font-sans leading-relaxed">
-                              {rec.description}
-                            </p>
+                            <div className="flex items-center gap-2 mt-4 pt-3 border-t border-white/[0.04]">
+                              <Button
+                                type="button"
+                                onClick={() => handleApplyRecommendation(rec, 'append')}
+                                className="h-6 px-3 bg-purple-500/20 hover:bg-purple-500/40 text-purple-300 font-mono text-[9px] rounded-md transition-colors"
+                              >
+                                {lang === "en" ? "Append" : "Anexar"}
+                              </Button>
+                              <Button
+                                type="button"
+                                onClick={() => handleApplyRecommendation(rec, 'overwrite')}
+                                className="h-6 px-3 bg-orange-500/20 hover:bg-orange-500/40 text-orange-300 font-mono text-[9px] rounded-md transition-colors"
+                              >
+                                {lang === "en" ? "Overwrite" : "Sobreescribir"}
+                              </Button>
+                              <Button
+                                type="button"
+                                onClick={() => handleApplyRecommendation(rec, 'ignore')}
+                                className="h-6 px-3 bg-white/5 hover:bg-white/10 text-white/50 font-mono text-[9px] rounded-md transition-colors ml-auto"
+                              >
+                                {lang === "en" ? "Ignore" : "Ignorar"}
+                              </Button>
+                            </div>
                           </div>
-                        );
-                      })}
-                    </div>
-                    <Button
-                      type="button"
-                      onClick={applyAuditRecommendations}
-                      className="w-full bg-purple-500 hover:bg-purple-600 text-white font-bold text-xs py-2 rounded-xl"
-                    >
-                      {lang === "en" ? "Apply Checked Audit Adjustments" : "Aplicar Ajustes Auditados Seleccionados"}
-                    </Button>
+                      ))}
                   </div>
                 ) : (
                   <p className="text-[10px] text-white/40 leading-relaxed font-sans">
@@ -1744,6 +1795,52 @@ export default function OnboardingPage() {
                 <ReviewSection title={lang === "en" ? "Tone of Voice Guidelines" : "Pautas de Tono de Voz"}>
                   <p className="text-[11px] text-white/60 leading-relaxed italic">{form.toneOfVoice || "—"}</p>
                 </ReviewSection>
+              </div>
+            </div>
+          )}
+
+          {step === 7 && (
+            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="space-y-2">
+                <h2 className="text-xl font-bold font-mono uppercase tracking-tight flex items-center gap-2">
+                  <Lightbulb className="h-5 w-5 text-[#00ff88]" />
+                  {t("competitorResearchTitle")}
+                </h2>
+                <p className="text-[11px] text-white/50 leading-relaxed max-w-xl font-mono">
+                  {t("competitorResearchDesc")}
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <textarea
+                    value={form.competitorResearch}
+                    onChange={(e) => updateForm({ competitorResearch: e.target.value })}
+                    placeholder={t("competitorNotesPlaceholder")}
+                    className="w-full h-48 bg-white/[0.03] border border-white/[0.1] rounded-xl p-4 text-[13px] text-white placeholder:text-white/20 focus:outline-none focus:border-[#00ff88]/50 focus:ring-1 focus:ring-[#00ff88]/50 transition-all font-mono resize-y"
+                  />
+                </div>
+
+                <div className="flex justify-end">
+                  <Button
+                    type="button"
+                    onClick={handleAnalyzeCompetitors}
+                    disabled={analyzingCompetitors || !form.competitorResearch.trim()}
+                    className="bg-[#00ff88]/10 hover:bg-[#00ff88]/20 text-[#00ff88] border border-[#00ff88]/20 font-mono text-xs rounded-xl"
+                  >
+                    {analyzingCompetitors ? (
+                      <>
+                        <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-t-transparent border-[#00ff88] mr-2" />
+                        {t("analyzingCompetitors")}
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="h-3.5 w-3.5 mr-2" />
+                        {t("analyzeCompetitorsBtn")}
+                      </>
+                    )}
+                  </Button>
+                </div>
               </div>
             </div>
           )}

@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
       : "All levels";
     const presetsStr = presets?.length ? presets.join(", ") : "Professional, friendly";
 
-    const userPrompt = `Please write a professional, strategic, and high-impact tone of voice guidelines (3 to 4 sentences max) in Spanish for the following brand:
+    const userPrompt = `Please write a professional, strategic, and high-impact tone of voice guideline in Spanish for the following brand:
 - Brand Name: ${brandName}
 - Industry: ${industry}
 - Target Demographic Markets: ${marketsStr}
@@ -47,7 +47,12 @@ export async function POST(request: NextRequest) {
 - Target Socio-Economic Profile: ${socioEconomicStr}
 - Preferred Tone Descriptors: ${presetsStr}
 
-Write the guidelines directly. Do not include any introductory remarks, conversational greetings, quotes, or markdown code blocks. Write it in Spanish, as TACT operates in Spanish.`;
+Structure your response exactly as follows (use these exact headings):
+Voz: [A strategic description of the brand's personality and character in 2-3 sentences]
+Tono: [A detailed explanation of how the brand speaks to its audience, including what to do and what to avoid]
+Ejemplo práctico: [A short example phrase or post demonstrating the tone]
+
+Write the guidelines directly. Do not include any introductory remarks, conversational greetings, quotes, or markdown code blocks. Write it entirely in Spanish.`;
 
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",

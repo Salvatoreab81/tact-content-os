@@ -31,7 +31,7 @@ export async function PUT(
     if (!brand) {
       return NextResponse.json({ error: "Brand not found" }, { status: 404 });
     }
-    const updatedBrand = await updateBrand(brand.id, body);
+    const updatedBrand = await updateBrand(slug, body);
     return NextResponse.json(updatedBrand);
   } catch (error) {
     return NextResponse.json(
