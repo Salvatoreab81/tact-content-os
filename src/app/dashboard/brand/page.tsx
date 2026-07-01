@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import {
   Building2,
   Save,
@@ -11,19 +12,112 @@ import {
   Hash,
   MessageSquare,
   Sparkles,
+  Mail,
+  Camera,
+  Users,
+  Video,
+  Briefcase,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 
+const XIcon = (props: any) => (
+  <svg viewBox="0 0 24 24" fill="currentColor" className={props.className}>
+    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+  </svg>
+);
+
 const PLATFORMS = [
-  { id: "instagram", label: "Instagram" },
-  { id: "facebook", label: "Facebook" },
-  { id: "tiktok", label: "TikTok" },
-  { id: "youtube", label: "YouTube" },
-  { id: "blog", label: "Blog" },
-  { id: "linkedin", label: "LinkedIn" },
+  { id: "instagram", label: "Instagram", icon: Camera },
+  { id: "facebook", label: "Facebook", icon: Users },
+  { id: "tiktok", label: "TikTok", icon: Video },
+  { id: "youtube", label: "YouTube", icon: Video },
+  { id: "blog", label: "Blog SEO", icon: PenLine },
+  { id: "linkedin", label: "LinkedIn", icon: Briefcase },
+  { id: "threads", label: "Threads", icon: MessageSquare },
+  { id: "x", label: "X.com", icon: XIcon },
+  { id: "newsletter", label: "Newsletter", icon: Mail },
 ];
+
+import { PenLine } from "lucide-react";
+
+const PLATFORM_DETAILS_MAP: Record<string, {
+  formats: { id: string; label: string }[];
+  focus: string;
+}> = {
+  instagram: {
+    formats: [
+      { id: "reels", label: "Reels" },
+      { id: "carousel", label: "Carousel Post" },
+      { id: "single", label: "Single Photo Post" },
+      { id: "stories", label: "Stories" }
+    ],
+    focus: "Visual hook first, structured copy in captions, and high interaction triggers."
+  },
+  facebook: {
+    formats: [
+      { id: "image", label: "Image Post" },
+      { id: "link", label: "Link Share" },
+      { id: "video", label: "Video Post" }
+    ],
+    focus: "Community engagement, longer conversational text, and link previews."
+  },
+  tiktok: {
+    formats: [
+      { id: "short", label: "Short Video (Trends)" },
+      { id: "tutorial", label: "Educational Video" }
+    ],
+    focus: "Furious 3-second hook, fast pacing, native text overlays, and audio sync."
+  },
+  youtube: {
+    formats: [
+      { id: "long", label: "Long Video Intro/Outline" },
+      { id: "shorts", label: "YouTube Shorts" },
+      { id: "community", label: "Community Post" }
+    ],
+    focus: "CTR-optimized titles, comprehensive outline structures, and direct calls to subscribe."
+  },
+  blog: {
+    formats: [
+      { id: "seo_article", label: "100% Yoast SEO Article" },
+      { id: "tutorial", label: "Step-by-Step Tutorial" },
+      { id: "guide", label: "In-Depth Guide" }
+    ],
+    focus: "100% Yoast SEO compliance: keyword density, H2/H3 semantic tags, short readability blocks, and meta description optimization."
+  },
+  linkedin: {
+    formats: [
+      { id: "story", label: "Professional Storytelling" },
+      { id: "pdf_carousel", label: "PDF Document Carousel" },
+      { id: "insight", label: "Industry Takeaways" }
+    ],
+    focus: "Elite professional tone, white-space formatting for readability, hook-story-value-cta structure."
+  },
+  threads: {
+    formats: [
+      { id: "short", label: "Conversational Post" },
+      { id: "thread", label: "Short Thread" }
+    ],
+    focus: "Casual, text-first, authentic voice, and quick-reply triggers."
+  },
+  x: {
+    formats: [
+      { id: "post", label: "Short Post (280 char)" },
+      { id: "thread", label: "Viral Thread Outline" },
+      { id: "article", label: "Long-form Article" }
+    ],
+    focus: "Contrarian viral hook, bulleted lists, high-punch delivery, and character constraint optimization."
+  },
+  newsletter: {
+    formats: [
+      { id: "weekly", label: "Weekly Digest" },
+      { id: "promo", label: "Promotional Offer" },
+      { id: "case_study", label: "Customer Case Study" }
+    ],
+    focus: "Intimate personal copywriting (Dear [Name]), CTR-optimized subject lines, and single prominent CTA link."
+  }
+};
 
 const VERTICALS = [
   { id: "education", label: "Education" },
@@ -34,19 +128,11 @@ const VERTICALS = [
   { id: "entertainment", label: "Entertainment" },
 ];
 
-const COUNTRIES = [
-  "United States", "United Kingdom", "Canada", "Australia", 
-  "Germany", "France", "Spain", "Italy", "Brazil", "Mexico", 
-  "Portugal", "Netherlands", "Japan", "India", "Nigeria", 
-  "South Africa", "UAE", "Singapore"
-];
-
 export default function BrandGuidelinesPage() {
   const [brand, setBrand] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
-  const [newMarket, setNewMarket] = useState("");
 
   // Memories / Brand Intelligence state
   const [memories, setMemories] = useState<any[]>([]);
@@ -61,6 +147,13 @@ export default function BrandGuidelinesPage() {
     markets: [] as string[],
     platforms: [] as string[],
     contentVerticals: [] as string[],
+    targetAudience: {
+      genders: [] as string[],
+      generations: [] as string[],
+      socioEconomic: "medium",
+      markets: [] as string[],
+    },
+    platformDetails: {} as Record<string, { formats: string[] }>
   });
 
   useEffect(() => {
@@ -79,6 +172,13 @@ export default function BrandGuidelinesPage() {
               markets: current.markets || [],
               platforms: current.platforms || [],
               contentVerticals: current.content_verticals || current.contentVerticals || [],
+              targetAudience: current.target_audience || current.targetAudience || {
+                genders: [],
+                generations: [],
+                socioEconomic: "medium",
+                markets: current.markets || []
+              },
+              platformDetails: current.platform_details || current.platformDetails || {}
             });
           }
         }
@@ -138,10 +238,16 @@ export default function BrandGuidelinesPage() {
     setSaving(true);
     setSaveSuccess(false);
     try {
+      // Sync markets root list with targetAudience markets
+      const payload = {
+        ...form,
+        markets: form.targetAudience.markets,
+      };
+
       const res = await fetch(`/api/brands/${brand.slug}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify(payload),
       });
       if (res.ok) {
         setSaveSuccess(true);
@@ -155,28 +261,74 @@ export default function BrandGuidelinesPage() {
   };
 
   const toggleArrayItem = (field: "platforms" | "contentVerticals", item: string) => {
-    setForm((prev) => ({
-      ...prev,
-      [field]: prev[field].includes(item)
+    setForm((prev) => {
+      const updatedList = prev[field].includes(item)
         ? prev[field].filter((i) => i !== item)
-        : [...prev[field], item],
+        : [...prev[field], item];
+
+      const updatedDetails = { ...prev.platformDetails };
+      if (field === "platforms") {
+        if (!prev.platforms.includes(item)) {
+          const defaultFormats = PLATFORM_DETAILS_MAP[item]?.formats.map(f => f.id).slice(0, 2) || [];
+          updatedDetails[item] = { formats: defaultFormats };
+        } else {
+          delete updatedDetails[item];
+        }
+      }
+
+      return {
+        ...prev,
+        [field]: updatedList,
+        platformDetails: updatedDetails
+      };
+    });
+  };
+
+  const toggleAudienceItem = (field: "genders" | "generations" | "markets", value: string) => {
+    setForm((prev) => {
+      const current = prev.targetAudience[field] || [];
+      const updated = current.includes(value)
+        ? current.filter((x) => x !== value)
+        : [...current, value];
+      return {
+        ...prev,
+        targetAudience: {
+          ...prev.targetAudience,
+          [field]: updated
+        }
+      };
+    });
+  };
+
+  const selectSocioEconomic = (value: string) => {
+    setForm((prev) => ({
+      ...prev,
+      targetAudience: {
+        ...prev.targetAudience,
+        socioEconomic: value
+      }
     }));
   };
 
-  const addMarket = () => {
-    if (!newMarket || form.markets.includes(newMarket)) return;
-    setForm((prev) => ({
-      ...prev,
-      markets: [...prev.markets, newMarket],
-    }));
-    setNewMarket("");
-  };
-
-  const removeMarket = (market: string) => {
-    setForm((prev) => ({
-      ...prev,
-      markets: prev.markets.filter((m) => m !== market),
-    }));
+  const togglePlatformFormat = (platformId: string, formatId: string) => {
+    setForm((prev) => {
+      const currentDetails = prev.platformDetails[platformId] || { formats: [] };
+      const currentFormats = currentDetails.formats || [];
+      const updatedFormats = currentFormats.includes(formatId)
+        ? currentFormats.filter((f) => f !== formatId)
+        : [...currentFormats, formatId];
+      
+      return {
+        ...prev,
+        platformDetails: {
+          ...prev.platformDetails,
+          [platformId]: {
+            ...currentDetails,
+            formats: updatedFormats
+          }
+        }
+      };
+    });
   };
 
   if (loading) {
@@ -195,12 +347,17 @@ export default function BrandGuidelinesPage() {
         <p className="text-sm text-white/40 max-w-sm mx-auto">
           Please complete the onboarding first to set up your brand guidelines.
         </p>
+        <Link href="/onboarding">
+          <Button className="bg-[#00ff88] hover:bg-[#00cc6a] text-black font-bold">
+            Start Setup Onboarding
+          </Button>
+        </Link>
       </div>
     );
   }
 
   return (
-    <div className="p-8 sm:p-10 lg:p-12 section-container space-y-8">
+    <div className="p-8 sm:p-10 lg:p-12 section-container space-y-8 select-none">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -208,19 +365,29 @@ export default function BrandGuidelinesPage() {
             Brand Guidelines
           </h1>
           <p className="text-sm text-white/50 mt-3 font-medium">
-            Manage your brand identity, tone of voice, and publishing channels
+            Manage your brand identity, tone of voice, demographics, and channels
           </p>
         </div>
         <div className="flex items-center gap-3">
+          <Link href="/onboarding">
+            <Button
+              type="button"
+              variant="outline"
+              className="border-[#00ff88]/20 bg-[#00ff88]/5 text-[#00ff88] hover:bg-[#00ff88]/10 font-bold transition-all duration-300 rounded-xl text-xs gap-2"
+            >
+              <Sparkles className="h-4 w-4" /> Re-run Setup Wizard
+            </Button>
+          </Link>
+
           {saveSuccess && (
             <span className="flex items-center gap-1.5 text-xs text-[#00ff88] font-semibold bg-[#00ff88]/10 border border-[#00ff88]/20 px-3 py-2 rounded-xl animate-fade-in">
-              <CheckCircle className="h-4 w-4" /> Saved Successfully!
+              <CheckCircle className="h-4 w-4" /> Saved!
             </span>
           )}
           <Button
             onClick={handleSave}
             disabled={saving}
-            className="bg-[#00ff88] hover:bg-[#00cc6a] text-[#0a0a1a] font-bold transition-all duration-300 glow-sm hover:scale-[1.03] shadow-[0_0_20px_rgba(0,255,136,0.2)]"
+            className="bg-[#00ff88] hover:bg-[#00cc6a] text-[#0a0a1a] font-bold transition-all duration-300 glow-sm hover:scale-[1.03] shadow-[0_0_20px_rgba(0,255,136,0.2)] rounded-xl"
           >
             {saving ? (
               <>
@@ -236,7 +403,7 @@ export default function BrandGuidelinesPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column: Core Identity & Tone */}
+        {/* Left Column: Core Identity, Tone & Demographics */}
         <div className="lg:col-span-2 space-y-6">
           {/* Identity Card */}
           <div className="glass p-6 space-y-4">
@@ -261,14 +428,6 @@ export default function BrandGuidelinesPage() {
                 />
               </div>
             </div>
-            <div>
-              <label className="block form-label mb-2">URL Slug (read-only)</label>
-              <Input
-                value={brand.slug}
-                disabled
-                className="glass-input opacity-45 cursor-not-allowed"
-              />
-            </div>
           </div>
 
           {/* Tone of Voice Card */}
@@ -279,12 +438,120 @@ export default function BrandGuidelinesPage() {
             <div>
               <label className="block form-label mb-2">Voice & Persona Guidelines</label>
               <textarea
-                rows={6}
+                rows={5}
                 value={form.toneOfVoice}
                 onChange={(e) => setForm({ ...form, toneOfVoice: e.target.value })}
                 placeholder="Describe your brand's voice and guidelines..."
                 className="w-full rounded-xl glass-input px-4 py-3 text-sm outline-none resize-none"
               />
+            </div>
+          </div>
+
+          {/* Target Audience / Segmentation Card */}
+          <div className="glass p-6 space-y-5">
+            <h3 className="text-sm font-bold text-white flex items-center gap-2 heading-brutal border-b border-white/[0.06] pb-4">
+              <Globe className="h-4 w-4 text-purple-400" /> Target Audience Demographics
+            </h3>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 text-xs">
+              {/* Gender target */}
+              <div className="space-y-2">
+                <span className="text-[10px] text-white/30 font-bold uppercase tracking-wider font-mono">Gender Group</span>
+                <div className="flex gap-2">
+                  {["both", "men", "women"].map((g) => {
+                    const isSelected = form.targetAudience.genders.includes(g);
+                    return (
+                      <button
+                        key={g}
+                        type="button"
+                        onClick={() => toggleAudienceItem("genders", g)}
+                        className={`rounded-lg px-3 py-1.5 font-bold capitalize transition-all ${
+                          isSelected
+                            ? "bg-purple-500/10 border border-purple-500/25 text-purple-400"
+                            : "bg-white/[0.02] border border-white/[0.06] text-white/35"
+                        }`}
+                      >
+                        {g}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Economic level */}
+              <div className="space-y-2">
+                <span className="text-[10px] text-white/30 font-bold uppercase tracking-wider font-mono">Socio-Economic Tier</span>
+                <div className="flex gap-2">
+                  {["medium", "high", "luxury"].map((t) => {
+                    const isSelected = form.targetAudience.socioEconomic === t;
+                    return (
+                      <button
+                        key={t}
+                        type="button"
+                        onClick={() => selectSocioEconomic(t)}
+                        className={`rounded-lg px-3 py-1.5 font-bold capitalize transition-all ${
+                          isSelected
+                            ? "bg-cyan-500/10 border border-cyan-500/25 text-cyan-400"
+                            : "bg-white/[0.02] border border-white/[0.06] text-white/35"
+                        }`}
+                      >
+                        {t}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* Generations target */}
+            <div className="space-y-2">
+              <span className="text-[10px] text-white/30 font-bold uppercase tracking-wider font-mono">Target Generations</span>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { id: "gen_z", label: "Gen Z" },
+                  { id: "millennials", label: "Millennials" },
+                  { id: "gen_x", label: "Gen X" },
+                  { id: "boomers", label: "Boomers" },
+                ].map((gen) => {
+                  const isSelected = form.targetAudience.generations.includes(gen.id);
+                  return (
+                    <button
+                      key={gen.id}
+                      type="button"
+                      onClick={() => toggleAudienceItem("generations", gen.id)}
+                      className={`rounded-lg px-3.5 py-2 text-xs font-bold transition-all ${
+                        isSelected
+                          ? "bg-[#00ff88]/10 border border-[#00ff88]/25 text-[#00ff88]"
+                          : "bg-white/[0.02] border border-white/[0.06] text-white/40"
+                      }`}
+                    >
+                      {gen.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Markets List */}
+            <div className="space-y-2">
+              <span className="text-[10px] text-white/30 font-bold uppercase tracking-wider font-mono">Markets & Geographic Focus</span>
+              <div className="flex flex-wrap gap-1.5">
+                {form.targetAudience.markets.map((m) => (
+                  <Badge
+                    key={m}
+                    variant="outline"
+                    className="rounded-lg bg-white/[0.04] border border-white/[0.08] px-2.5 py-1 text-xs text-white/70 font-mono flex items-center gap-1.5"
+                  >
+                    {m}
+                    <button
+                      onClick={() => toggleAudienceItem("markets", m)}
+                      className="text-white/30 hover:text-white/80 transition-colors"
+                    >
+                      ×
+                    </button>
+                  </Badge>
+                ))}
+              </div>
             </div>
           </div>
 
@@ -361,71 +628,65 @@ export default function BrandGuidelinesPage() {
           </div>
         </div>
 
-        {/* Right Column: Channels & Verticals */}
+        {/* Right Column: Channels, Active Formats & Focus Guidelines */}
         <div className="space-y-6">
-          {/* Target Markets */}
-          <div className="glass p-6 space-y-4">
+          {/* Platforms & Formats Details */}
+          <div className="glass p-6 space-y-5">
             <h3 className="text-sm font-bold text-white flex items-center gap-2 heading-brutal border-b border-white/[0.06] pb-4">
-              <Globe className="h-4 w-4 text-purple-400" /> Target Markets
+              <Layers className="h-4 w-4 text-[#ffaa00]/60" /> Channels & Formats
             </h3>
-            <div className="flex gap-2">
-              <select
-                value={newMarket}
-                onChange={(e) => setNewMarket(e.target.value)}
-                className="flex-1 rounded-xl glass-select px-3 py-2 text-sm"
-              >
-                <option value="">Select a country</option>
-                {COUNTRIES.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
-                ))}
-              </select>
-              <Button onClick={addMarket} className="bg-purple-500 hover:bg-purple-600 text-white">
-                Add
-              </Button>
-            </div>
-            <div className="flex flex-wrap gap-1.5 pt-2">
-              {form.markets.map((m) => (
-                <Badge
-                  key={m}
-                  variant="outline"
-                  className="rounded-lg bg-white/[0.06] border border-white/[0.08] px-2.5 py-1 text-xs text-white/70 font-mono flex items-center gap-1.5"
-                >
-                  {m}
-                  <button
-                    onClick={() => removeMarket(m)}
-                    className="text-white/30 hover:text-white/80 transition-colors"
-                  >
-                    ×
-                  </button>
-                </Badge>
-              ))}
-            </div>
-          </div>
 
-          {/* Platforms */}
-          <div className="glass p-6 space-y-4">
-            <h3 className="text-sm font-bold text-white flex items-center gap-2 heading-brutal border-b border-white/[0.06] pb-4">
-              <Layers className="h-4 w-4 text-[#ffaa00]/60" /> Platforms
-            </h3>
-            <div className="grid grid-cols-2 gap-3">
-              {PLATFORMS.map((p) => {
-                const isActive = form.platforms.includes(p.id);
-                return (
-                  <button
-                    key={p.id}
-                    onClick={() => toggleArrayItem("platforms", p.id)}
-                    className={`rounded-xl border px-3 py-2.5 text-xs font-semibold text-center transition-all duration-300 ${
-                      isActive
-                        ? "bg-[#00ff88]/10 border-[#00ff88]/25 text-[#00ff88]"
-                        : "bg-white/[0.04] border-white/[0.08] text-white/45 hover:text-white hover:border-white/[0.15]"
-                    }`}
-                  >
-                    {p.label}
-                  </button>
-                );
-              })}
+            <div className="space-y-4 max-h-[480px] overflow-y-auto pr-1">
+              {form.platforms.length === 0 ? (
+                <p className="text-xs text-white/35 text-center py-6">
+                  No active channels. Go through Onboarding setup to configure active publishing channels.
+                </p>
+              ) : (
+                form.platforms.map((platformId) => {
+                  const details = PLATFORM_DETAILS_MAP[platformId];
+                  const pInfo = PLATFORMS.find(p => p.id === platformId);
+                  if (!details || !pInfo) return null;
+
+                  const formatsSelected = form.platformDetails[platformId]?.formats || [];
+
+                  return (
+                    <div key={platformId} className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 space-y-3">
+                      <div className="flex items-center gap-2 border-b border-white/[0.06] pb-2">
+                        <pInfo.icon className="h-3.5 w-3.5 text-[#00ff88]" />
+                        <span className="text-xs font-bold text-white uppercase tracking-wider font-mono">{pInfo.label}</span>
+                      </div>
+
+                      <div className="space-y-1">
+                        <span className="text-[8px] font-bold text-[#00d4ff] uppercase tracking-wider font-mono">Tact strategist guideline</span>
+                        <p className="text-[10px] text-white/50 leading-relaxed font-sans">{details.focus}</p>
+                      </div>
+
+                      <div className="space-y-2">
+                        <span className="text-[8px] font-bold text-white/40 uppercase tracking-wider font-mono">Active Formats</span>
+                        <div className="flex flex-wrap gap-1">
+                          {details.formats.map((fmt) => {
+                            const isFmtActive = formatsSelected.includes(fmt.id);
+                            return (
+                              <button
+                                key={fmt.id}
+                                type="button"
+                                onClick={() => togglePlatformFormat(platformId, fmt.id)}
+                                className={`rounded px-2 py-1 text-[9px] font-mono border transition-all ${
+                                  isFmtActive
+                                    ? "bg-purple-500/10 border-purple-500/20 text-purple-400 font-bold"
+                                    : "bg-white/[0.02] border-white/[0.04] text-white/30"
+                                }`}
+                              >
+                                {fmt.label}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
             </div>
           </div>
 

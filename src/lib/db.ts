@@ -69,6 +69,10 @@ export async function updateBrand(slug: string, data: any) {
   if (data.brand_colors !== undefined) updateData.brand_colors = data.brand_colors;
   if (data.brandFonts !== undefined) updateData.brand_fonts = data.brandFonts;
   if (data.brand_fonts !== undefined) updateData.brand_fonts = data.brand_fonts;
+  if (data.targetAudience !== undefined) updateData.target_audience = data.targetAudience;
+  if (data.target_audience !== undefined) updateData.target_audience = data.target_audience;
+  if (data.platformDetails !== undefined) updateData.platform_details = data.platformDetails;
+  if (data.platform_details !== undefined) updateData.platform_details = data.platform_details;
 
   await docRef.update(updateData);
   const updatedDoc = await docRef.get();
@@ -126,6 +130,8 @@ export async function createBrand(data: any) {
     content_verticals: data.contentVerticals || [],
     brand_colors: data.brandColors || {},
     brand_fonts: data.brandFonts || {},
+    target_audience: data.targetAudience || data.target_audience || null,
+    platform_details: data.platformDetails || data.platform_details || null,
     created_at: FieldValue.serverTimestamp()
   };
   await ref.set(brandData);

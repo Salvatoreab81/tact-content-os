@@ -199,22 +199,7 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          {/* Onboarding Setup Card */}
-          <div className="glass p-6 space-y-4">
-            <h3 className="text-sm font-bold text-white flex items-center gap-2 heading-brutal border-b border-white/[0.06] pb-4">
-              <Building2 className="h-4 w-4 text-cyan-400" /> Brand Setup & Onboarding
-            </h3>
-            <p className="text-xs text-white/40 leading-relaxed">
-              Need to set up a new brand profile or redefine your content strategist parameters? Launch the interactive onboarding sequence again.
-            </p>
-            <div className="pt-2">
-              <Link href="/onboarding">
-                <Button className="w-full bg-cyan-500 hover:bg-cyan-600 text-white font-bold transition-all duration-300 rounded-xl text-xs">
-                  Re-run Brand Onboarding
-                </Button>
-              </Link>
-            </div>
-          </div>
+
         </div>
       </div>
     </div>
