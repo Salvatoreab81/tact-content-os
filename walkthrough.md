@@ -5,13 +5,14 @@ This walkthrough summarizes the new enterprise-grade capabilities built into the
 ---
 
 ## 1. Multi-Step Onboarding Reordered
-The onboarding wizard steps are now organized to feed target demographics, markets, and active formats directly into the Tone Suggestion engine:
-1. **Brand Basics** (Core identity details)
-2. **Target Audience** (Geographics, Genders, Generations, and Income selection)
-3. **Platforms & Formats** (Channels selection and focus areas)
-4. **Content Verticals** (With illustrative examples and descriptions)
-5. **Tone of Voice** (Reads all previous metrics to suggest guidelines)
-6. **Review & AI Strategy Audit** (AI consultation critique challenge)
+The onboarding wizard steps are now organized to configure credential settings and feed target demographics, markets, and active formats directly into the Tone Suggestion engine:
+1. **API & Model Setup** (Configure custom OpenRouter key override and preferred AI brain)
+2. **Brand Basics** (Core identity details)
+3. **Target Audience** (Geographics, Genders, Generations, and Income selection)
+4. **Platforms & Formats** (Channels selection and focus areas)
+5. **Content Verticals** (With illustrative examples and descriptions)
+6. **Tone of Voice** (Reads all previous metrics to suggest guidelines)
+7. **Review & AI Strategy Audit** (AI consultation critique challenge)
 
 ---
 
@@ -42,4 +43,7 @@ The onboarding wizard steps are now organized to feed target demographics, marke
 * **Clean Default English + Mexican Spanish Selector:** Removed all mixed Spanish (Spanglish) tags and replaced them with clean default English. Added a premium glassmorphic language switcher toggle in the top-right header of both the Onboarding Wizard and the Brand Guidelines Dashboard, allowing the user to seamlessly switch to a fully localized Mexican Spanish (`ES-MX`) layout.
 * **Sleek Glassmorphic Toast Notifications:** Replaced primitive browser alerts with a custom, high-fidelity Toast system. Features smooth animations, icons (Success, Error, Info), automatic timeout fades, and direct rendering of detailed Firestore/OpenRouter error messages to assist in production debugging. Removed the remaining raw browser alert popups on the Onboarding Page form submission handler.
 * **OpenRouter Model Sanitization:** Added a dynamic fallback check inside `/api/generate/audit` and `/api/generate/tone` endpoints. If the deprecated/deleted `google/gemini-2.0-flash-exp:free` model remains configured in the deployment's environment variables (`OPENROUTER_MODEL`), the backend automatically sanitizes it to the stable `google/gemini-2.0-flash` endpoint, resolving strategic audit errors immediately.
+* **Onboarding API & Model Setup:** Added Step 0 to the onboarding wizard, allowing users to optionally provide their own custom OpenRouter API Key (to override the server default) and select their preferred AI model. The system explains what the API credentials power and stores the key and model in the brand's Firestore profile for background generation.
+
+
 
