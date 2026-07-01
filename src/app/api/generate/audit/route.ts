@@ -20,7 +20,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const defaultModel = process.env.OPENROUTER_MODEL || "google/gemini-2.0-flash-exp:free";
+    let defaultModel = process.env.OPENROUTER_MODEL || "google/gemini-2.0-flash";
+    if (defaultModel.includes("gemini-2.0-flash-exp")) {
+      defaultModel = "google/gemini-2.0-flash";
+    }
     const selectedModel = model || defaultModel;
 
     const systemPrompt = `You are an elite, highly critical AI Chief Marketing Officer and Strategy Consultant. Your job is to analyze brand setups and find target mismatches, missed opportunities, or format inconsistencies.`;

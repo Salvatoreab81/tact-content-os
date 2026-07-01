@@ -786,11 +786,21 @@ export default function OnboardingPage() {
       } else {
         const errorData = await res.json().catch(() => ({}));
         console.error("Save failed:", errorData.error);
-        alert(`Error al guardar configuración: ${errorData.error || "Error interno del servidor"}`);
+        showToast(
+          lang === "en"
+            ? `Save failed: ${errorData.error || "Internal server error"}`
+            : `Error al guardar configuración: ${errorData.error || "Error interno del servidor"}`,
+          "error"
+        );
       }
     } catch (err: any) {
       console.error("Save error:", err);
-      alert(`Error de red al guardar: ${err.message}`);
+      showToast(
+        lang === "en"
+          ? `Network error saving: ${err.message}`
+          : `Error de red al guardar: ${err.message}`,
+        "error"
+      );
     } finally {
       setSubmitting(false);
     }
