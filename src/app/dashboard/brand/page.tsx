@@ -21,6 +21,8 @@ import {
   ArrowRight,
   Eye,
   RotateCcw,
+  AlertCircle,
+  Info,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -132,11 +134,109 @@ const VERTICALS = [
   { id: "entertainment", label: "Entertainment" },
 ];
 
+const PLATFORM_TRANSLATIONS: Record<string, { focus: string; formats: Record<string, string> }> = {
+  instagram: {
+    focus: "Gancho visual primero, texto estructurado en descripciones e incentivos de interacción.",
+    formats: { reels: "Reels", carousel: "Publicación Carrusel", single: "Imagen Única", stories: "Stories" }
+  },
+  facebook: {
+    focus: "Interacción de la comunidad, textos conversacionales más largos y vistas previas de enlaces.",
+    formats: { image: "Publicación de Imagen", link: "Compartir Enlace", video: "Publicación de Video" }
+  },
+  tiktok: {
+    focus: "Gancho inicial de 3 segundos, ritmo rápido, textos nativos superpuestos y audio en tendencia.",
+    formats: { short: "Video Corto (Tendencias)", tutorial: "Video Educativo" }
+  },
+  youtube: {
+    focus: "Títulos optimizados para CTR, estructura de contenido completa y llamado a la acción directo.",
+    formats: { long: "Intro/Guion Video Largo", shorts: "YouTube Shorts", community: "Comunidad" }
+  },
+  blog: {
+    focus: "100% optimizado para Yoast SEO: densidad de palabras clave, etiquetas H2/H3, párrafos legibles y meta descripción.",
+    formats: { seo_article: "Artículo 100% Yoast SEO", tutorial: "Tutorial Paso a Paso", guide: "Guía Detallada" }
+  },
+  linkedin: {
+    focus: "Tono profesional, estructura limpia con espacios, gancho-historia-valor-llamado a la acción.",
+    formats: { story: "Narrativa Profesional", pdf_carousel: "Carrusel de Documento PDF", insight: "Perspectivas del Sector" }
+  },
+  threads: {
+    focus: "Tono casual, primero texto, voz auténtica e hilos rápidos que inviten a opinar.",
+    formats: { short: "Publicación Casual", thread: "Hilo Corto" }
+  },
+  x: {
+    focus: "Gancho viral e impactante, listas de viñetas, tono conciso y optimización del límite de caracteres.",
+    formats: { post: "Post Corto (280 char)", thread: "Estructura de Hilo Viral", article: "Artículo Largo" }
+  },
+  newsletter: {
+    focus: "Copia íntima y directa (Estimado/a [Nombre]), asuntos de correo con alto CTR y un enlace destacado de llamada a la acción.",
+    formats: { weekly: "Resumen Semanal", promo: "Oferta Promocional", case_study: "Caso de Éxito de Cliente" }
+  }
+};
+
+const TRANSLATIONS = {
+  en: {
+    brandGuidelinesDashboard: "Brand Guidelines Dashboard",
+    editGuidelinesOnboarding: "Edit Guidelines (Onboarding)",
+    saveChanges: "Save active guidelines",
+    brandPersonaTitle: "Brand Persona & Tone Guidelines",
+    brandPersonaDesc: "Describe how TACT should communicate and represent your brand identity.",
+    targetAudienceDemographics: "Target Audience Demographics",
+    activeChannelsTitle: "Active Channels, Formats & Focus Rules",
+    brandColorsFonts: "Brand Identity Assets (Colors & Fonts)",
+    brandMemoryIntelligence: "Brand Memory & Context Intelligence",
+    versionHistoryTitle: "Brand Version History & Rollbacks",
+    versionHistoryDesc: "Restore your brand configuration to any past snapshot in one click.",
+    brandName: "Brand Name",
+    industry: "Industry",
+    loadingBrand: "Loading brand profile...",
+    savingGuidelines: "Saving guidelines...",
+  },
+  es: {
+    brandGuidelinesDashboard: "Panel de Guías de Marca",
+    editGuidelinesOnboarding: "Editar Guías (Onboarding)",
+    saveChanges: "Guardar guías activas",
+    brandPersonaTitle: "Personalidad de Marca y Pautas de Tono",
+    brandPersonaDesc: "Describe cómo debe comunicarse TACT y representar la identidad de tu marca.",
+    targetAudienceDemographics: "Demografía de la Audiencia Objetivo",
+    activeChannelsTitle: "Canales Activos, Formatos y Reglas de Enfoque",
+    brandColorsFonts: "Identidad Visual (Colores y Fuentes)",
+    brandMemoryIntelligence: "Memoria de Marca e Inteligencia de Contexto",
+    versionHistoryTitle: "Historial de Versiones y Restauración",
+    versionHistoryDesc: "Restaura la configuración de tu marca a cualquier versión pasada en un clic.",
+    brandName: "Nombre de Marca",
+    industry: "Industria",
+    loadingBrand: "Cargando perfil de marca...",
+    savingGuidelines: "Guardando guías...",
+  }
+};
+
 export default function BrandGuidelinesPage() {
   const [brand, setBrand] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [lang, setLang] = useState<"en" | "es">("en");
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null);
+
+  useEffect(() => {
+    const savedLang = localStorage.getItem("tact_lang") as "en" | "es";
+    if (savedLang === "en" || savedLang === "es") {
+      setLang(savedLang);
+    }
+  }, []);
+
+  const changeLanguage = (l: "en" | "es") => {
+    setLang(l);
+    localStorage.setItem("tact_lang", l);
+  };
+
+  const showToast = (msg: string, type: "success" | "error" | "info" = "success") => {
+    setToast({ message: msg, type });
+  };
+
+  const t = (key: keyof typeof TRANSLATIONS.en) => {
+    return TRANSLATIONS[lang][key] || TRANSLATIONS.en[key] || key;
+  };
 
   // Memories / Brand Intelligence state
   const [memories, setMemories] = useState<any[]>([]);
@@ -314,15 +414,21 @@ export default function BrandGuidelinesPage() {
       if (res.ok) {
         setSaveSuccess(true);
         setTimeout(() => setSaveSuccess(false), 3000);
+        showToast(lang === "en" ? "Guidelines saved successfully!" : "¡Configuración de marca guardada con éxito!", "success");
         // Refresh history list
         const histRes = await fetch("/api/brands/history");
         if (histRes.ok) {
           const data = await histRes.json();
           setHistoryList(data || []);
         }
+      } else {
+        const errorData = await res.json().catch(() => ({}));
+        console.error("Save failed:", errorData.error);
+        showToast(lang === "en" ? `Save failed: ${errorData.error || "Internal error"}` : `Error al guardar: ${errorData.error || "Error interno"}`, "error");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error saving brand details:", err);
+      showToast(lang === "en" ? `Save failed: ${err.message}` : `Error de red al guardar: ${err.message}`, "error");
     } finally {
       setSaving(false);
     }
@@ -337,11 +443,17 @@ export default function BrandGuidelinesPage() {
         body: JSON.stringify({ versionId }),
       });
       if (res.ok) {
-        // Refresh page completely to load restored guidelines
-        window.location.reload();
+        showToast(lang === "en" ? "Restoring snapshot..." : "Restaurando versión...", "success");
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
+      } else {
+        const errorData = await res.json().catch(() => ({}));
+        showToast(lang === "en" ? `Restore failed: ${errorData.error || "Internal error"}` : `Fallo al restaurar: ${errorData.error || "Error interno"}`, "error");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Restore failed:", err);
+      showToast(lang === "en" ? `Restore failed: ${err.message}` : `Error de red al restaurar: ${err.message}`, "error");
     } finally {
       setSaving(false);
       setSelectedHistoryVer(null);
@@ -420,33 +532,85 @@ export default function BrandGuidelinesPage() {
 
   return (
     <div className="p-8 sm:p-10 lg:p-12 section-container space-y-8 select-none relative">
+      {/* Toast Notification */}
+      {toast && (
+        <div className={`fixed bottom-5 right-5 z-50 flex items-center gap-3 rounded-2xl border p-4 shadow-2xl backdrop-blur-md animate-in fade-in slide-in-from-bottom-5 duration-300 ${
+          toast.type === "success"
+            ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+            : toast.type === "error"
+              ? "bg-rose-500/10 border-rose-500/20 text-rose-400"
+              : "bg-blue-500/10 border-blue-500/20 text-blue-400"
+        }`}>
+          {toast.type === "success" ? (
+            <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-emerald-500/20 text-emerald-400">
+              <CheckCircle className="h-3.5 w-3.5" />
+            </div>
+          ) : toast.type === "error" ? (
+            <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-rose-500/20 text-rose-400">
+              <AlertCircle className="h-3.5 w-3.5" />
+            </div>
+          ) : (
+            <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-blue-500/20 text-blue-400">
+              <Info className="h-3.5 w-3.5" />
+            </div>
+          )}
+          <div className="space-y-0.5">
+            <span className="block text-[9px] font-bold font-mono uppercase tracking-wider">
+              {toast.type === "success" ? "Success" : toast.type === "error" ? "System Alert" : "Info"}
+            </span>
+            <p className="text-[11px] text-white/70 font-sans leading-tight pr-4">{toast.message}</p>
+          </div>
+          <button onClick={() => setToast(null)} className="text-white/25 hover:text-white/50 text-xs ml-auto font-mono p-1">
+            ×
+          </button>
+        </div>
+      )}
+
+      {/* Language Selector Selector */}
+      <div className="absolute top-4 right-4 flex items-center gap-1 rounded-xl border border-white/[0.06] bg-white/[0.02] p-1 backdrop-blur-sm z-30">
+        <button
+          type="button"
+          onClick={() => changeLanguage("en")}
+          className={`rounded-lg px-2.5 py-1 text-[10px] font-bold font-mono transition-all ${
+            lang === "en" ? "bg-[#00ff88]/10 text-[#00ff88] border border-[#00ff88]/20" : "text-white/40 hover:text-white/70"
+          }`}
+        >
+          EN
+        </button>
+        <button
+          type="button"
+          onClick={() => changeLanguage("es")}
+          className={`rounded-lg px-2.5 py-1 text-[10px] font-bold font-mono transition-all ${
+            lang === "es" ? "bg-[#00ff88]/10 text-[#00ff88] border border-[#00ff88]/20" : "text-white/40 hover:text-white/70"
+          }`}
+        >
+          ES-MX
+        </button>
+      </div>
       
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-4xl font-extrabold text-white tracking-tight heading-glow flex items-center gap-3">
-            Brand Guidelines
+            {t("brandGuidelinesDashboard")}
           </h1>
           <p className="text-sm text-white/50 mt-3 font-medium">
-            Manage your brand identity, tone of voice, demographics, and channels
+            {lang === "en"
+              ? "Manage your brand identity, tone of voice, demographics, and channels"
+              : "Administra la identidad de tu marca, tono de voz, datos demográficos y canales"}
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 pr-20 sm:pr-0">
           <Link href="/onboarding">
             <Button
               type="button"
               variant="outline"
               className="border-[#00ff88]/20 bg-[#00ff88]/5 text-[#00ff88] hover:bg-[#00ff88]/10 font-bold transition-all duration-300 rounded-xl text-xs gap-2"
             >
-              <Sparkles className="h-4 w-4" /> Re-run Setup Wizard
+              <Sparkles className="h-4 w-4" /> {lang === "en" ? "Re-run Setup Wizard" : "Relanzar Configuración"}
             </Button>
           </Link>
 
-          {saveSuccess && (
-            <span className="flex items-center gap-1.5 text-xs text-[#00ff88] font-semibold bg-[#00ff88]/10 border border-[#00ff88]/20 px-3 py-2 rounded-xl animate-fade-in">
-              <CheckCircle className="h-4 w-4" /> Saved!
-            </span>
-          )}
           <Button
             onClick={handleSave}
             disabled={saving}
@@ -454,11 +618,11 @@ export default function BrandGuidelinesPage() {
           >
             {saving ? (
               <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" /> Saving...
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" /> {t("savingGuidelines")}
               </>
             ) : (
               <>
-                <Save className="h-4 w-4 mr-2" /> Save Guidelines
+                <Save className="h-4 w-4 mr-2" /> {t("saveChanges")}
               </>
             )}
           </Button>
@@ -471,11 +635,11 @@ export default function BrandGuidelinesPage() {
           {/* Identity Card */}
           <div className="glass p-6 space-y-4">
             <h3 className="text-sm font-bold text-white flex items-center gap-2 heading-brutal border-b border-white/[0.06] pb-4">
-              <Building2 className="h-4 w-4 text-[#00d4ff]/60" /> Core Identity
+              <Building2 className="h-4 w-4 text-[#00d4ff]/60" /> {lang === "en" ? "Core Identity" : "Identidad Central"}
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block form-label mb-2">Brand Name</label>
+                <label className="block form-label mb-2">{t("brandName")}</label>
                 <Input
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
@@ -483,7 +647,7 @@ export default function BrandGuidelinesPage() {
                 />
               </div>
               <div>
-                <label className="block form-label mb-2">Industry</label>
+                <label className="block form-label mb-2">{t("industry")}</label>
                 <Input
                   value={form.industry}
                   onChange={(e) => setForm({ ...form, industry: e.target.value })}
@@ -496,15 +660,15 @@ export default function BrandGuidelinesPage() {
           {/* Tone of Voice Card */}
           <div className="glass p-6 space-y-4">
             <h3 className="text-sm font-bold text-white flex items-center gap-2 heading-brutal border-b border-white/[0.06] pb-4">
-              <MessageSquare className="h-4 w-4 text-[#00ff88]/60" /> Tone of Voice
+              <MessageSquare className="h-4 w-4 text-[#00ff88]/60" /> {lang === "en" ? "Tone of Voice" : "Tono de Voz"}
             </h3>
             <div>
-              <label className="block form-label mb-2">Voice & Persona Guidelines</label>
+              <label className="block form-label mb-2">{lang === "en" ? "Voice & Persona Guidelines" : "Pautas de Voz y Personalidad"}</label>
               <textarea
                 rows={5}
                 value={form.toneOfVoice}
                 onChange={(e) => setForm({ ...form, toneOfVoice: e.target.value })}
-                placeholder="Describe your brand's voice and guidelines..."
+                placeholder={lang === "en" ? "Describe your brand's voice and guidelines..." : "Describe la voz y pautas de tu marca..."}
                 className="w-full rounded-xl glass-input px-4 py-3 text-sm outline-none resize-none"
               />
             </div>
@@ -513,38 +677,44 @@ export default function BrandGuidelinesPage() {
           {/* Target Audience / Segmentation Card */}
           <div className="glass p-6 space-y-6">
             <h3 className="text-sm font-bold text-white flex items-center gap-2 heading-brutal border-b border-white/[0.06] pb-4">
-              <Globe className="h-4 w-4 text-purple-400" /> Target Audience Demographics
+              <Globe className="h-4 w-4 text-purple-400" /> {t("targetAudienceDemographics")}
             </h3>
 
             {/* Geographic Markets */}
             <div className="space-y-2">
-              <span className="text-[10px] text-white/30 font-bold uppercase tracking-wider font-mono">Markets & Geographic Focus</span>
+              <span className="text-[10px] text-white/30 font-bold uppercase tracking-wider font-mono">{lang === "en" ? "Markets & Geographic Focus" : "Enfoque Geográfico y Mercados"}</span>
               <div className="flex flex-wrap gap-1.5">
-                {form.targetAudience.regions.map((reg) => (
-                  <Badge
-                    key={reg}
-                    variant="outline"
-                    className="rounded-lg bg-cyan-500/10 border border-cyan-500/20 px-2.5 py-1 text-xs text-cyan-400 font-mono capitalize"
-                  >
-                    Region: {reg}
-                  </Badge>
-                ))}
-                {form.targetAudience.countries.map((m) => (
-                  <Badge
-                    key={m}
-                    variant="outline"
-                    className="rounded-lg bg-white/[0.04] border border-white/[0.08] px-2.5 py-1 text-xs text-white/70 font-mono"
-                  >
-                    {m}
-                  </Badge>
-                ))}
+                {form.targetAudience.regions.map((reg) => {
+                  const regLabel = lang === "es" ? (reg === "latam" ? "América Latina" : reg === "north_america" ? "Norteamérica" : reg === "europe" ? "Europa" : reg === "apac" ? "Asia-Pacífico" : "Medio Oriente") : reg;
+                  return (
+                    <Badge
+                      key={reg}
+                      variant="outline"
+                      className="rounded-lg bg-cyan-500/10 border border-cyan-500/20 px-2.5 py-1 text-xs text-cyan-400 font-mono capitalize"
+                    >
+                      {lang === "en" ? "Region:" : "Región:"} {regLabel}
+                    </Badge>
+                  );
+                })}
+                {form.targetAudience.countries.map((m) => {
+                  const countryLabel = lang === "es" ? (m === "United States" ? "Estados Unidos" : m === "United Kingdom" ? "Reino Unido" : m) : m;
+                  return (
+                    <Badge
+                      key={m}
+                      variant="outline"
+                      className="rounded-lg bg-white/[0.04] border border-white/[0.08] px-2.5 py-1 text-xs text-white/70 font-mono"
+                    >
+                      {countryLabel}
+                    </Badge>
+                  );
+                })}
               </div>
             </div>
 
             {/* Excluded Markets */}
             {form.targetAudience.excludedCountries?.length > 0 && (
               <div className="space-y-2 pt-1 border-t border-white/[0.04]">
-                <span className="text-[10px] text-red-400 font-bold uppercase tracking-wider font-mono">Excluded Markets</span>
+                <span className="text-[10px] text-red-400 font-bold uppercase tracking-wider font-mono">{lang === "en" ? "Excluded Markets" : "Mercados Excluidos"}</span>
                 <div className="flex flex-wrap gap-1.5">
                   {form.targetAudience.excludedCountries.map((ex) => (
                     <Badge
@@ -563,9 +733,9 @@ export default function BrandGuidelinesPage() {
               {/* Gender ratio split bar */}
               <div className="space-y-3">
                 <div className="flex justify-between text-xs font-mono font-semibold">
-                  <span className="text-white/40">Gender Distribution</span>
+                  <span className="text-white/40">{lang === "en" ? "Gender Distribution" : "Distribución de Género"}</span>
                   <span className="text-[#00ff88]">
-                    {form.targetAudience.genders.men}% Men / {form.targetAudience.genders.women}% Women
+                    {form.targetAudience.genders.men}% {lang === "en" ? "Men" : "Hombres"} / {form.targetAudience.genders.women}% {lang === "en" ? "Women" : "Mujeres"}
                   </span>
                 </div>
                 <div className="flex h-2.5 rounded-full overflow-hidden bg-white/10 w-full shadow-inner">
@@ -573,14 +743,14 @@ export default function BrandGuidelinesPage() {
                   <div style={{ width: `${form.targetAudience.genders.women}%` }} className="bg-purple-500" />
                 </div>
                 <div className="flex justify-between text-[9px] text-white/30 font-mono">
-                  <span>Hombres</span>
-                  <span>Mujeres</span>
+                  <span>{lang === "en" ? "MEN" : "HOMBRES"}</span>
+                  <span>{lang === "en" ? "WOMEN" : "MUJERES"}</span>
                 </div>
               </div>
 
               {/* Generations target */}
               <div className="space-y-2">
-                <span className="text-[10px] text-white/30 font-bold uppercase tracking-wider font-mono block">Target Generations</span>
+                <span className="text-[10px] text-white/30 font-bold uppercase tracking-wider font-mono block">{lang === "en" ? "Target Generations" : "Generaciones Objetivo"}</span>
                 <div className="flex flex-wrap gap-1.5">
                   {form.targetAudience.generations.map((g) => (
                     <Badge
@@ -597,15 +767,17 @@ export default function BrandGuidelinesPage() {
 
             {/* Socio-Economic split badges */}
             <div className="space-y-3 pt-4 border-t border-white/[0.04]">
-              <span className="text-[10px] text-white/30 font-bold uppercase tracking-wider font-mono block">Socio-Economic Focus</span>
+              <span className="text-[10px] text-white/30 font-bold uppercase tracking-wider font-mono block">{lang === "en" ? "Socio-Economic Focus" : "Nivel Socioeconómico"}</span>
               <div className="grid grid-cols-2 gap-3">
                 {[
-                  { id: "ab", label: "A/B (Luxury / Alto)", desc: "Consumidores de lujo y alto nivel adquisitivo", color: "text-[#00ff88] border-[#00ff88]/20 bg-[#00ff88]/5" },
-                  { id: "cplus", label: "C+ (Premium)", desc: "Clase media alta con preferencia por lo premium", color: "text-[#00d4ff] border-[#00d4ff]/20 bg-[#00d4ff]/5" },
-                  { id: "c", label: "C (Clase Media)", desc: "Mercado masivo con foco en calidad-precio", color: "text-purple-400 border-purple-500/20 bg-purple-500/5" },
-                  { id: "de", label: "D/E (Bajo Costo)", desc: "Mercado de bajo costo o presupuesto ajustado", color: "text-rose-400 border-rose-500/20 bg-rose-500/5" },
+                  { id: "ab", label: "A/B (Luxury / Alto)", labelEn: "A/B (Luxury / High)", desc: "Consumidores de lujo y alto nivel adquisitivo", descEn: "Luxury and high purchasing power consumers", color: "text-[#00ff88] border-[#00ff88]/20 bg-[#00ff88]/5" },
+                  { id: "cplus", label: "C+ (Premium)", labelEn: "C+ (Premium)", desc: "Clase media alta con preferencia por lo premium", descEn: "Upper middle class with premium preference", color: "text-[#00d4ff] border-[#00d4ff]/20 bg-[#00d4ff]/5" },
+                  { id: "c", label: "C (Clase Media)", labelEn: "C (Middle Class)", desc: "Mercado masivo con foco en calidad-precio", descEn: "Mass market focused on quality-price value", color: "text-purple-400 border-purple-500/20 bg-purple-500/5" },
+                  { id: "de", label: "D/E (Bajo Costo)", labelEn: "D/E (Low Cost)", desc: "Mercado de bajo costo o presupuesto ajustado", descEn: "Low cost market or tight budget focus", color: "text-rose-400 border-rose-500/20 bg-rose-500/5" },
                 ].map((tier) => {
                   const isActive = form.targetAudience.socioEconomic.includes(tier.id);
+                  const tierLabel = lang === "en" ? tier.labelEn : tier.label;
+                  const tierDesc = lang === "en" ? tier.descEn : tier.desc;
                   return (
                     <div
                       key={tier.id}
@@ -615,8 +787,8 @@ export default function BrandGuidelinesPage() {
                           : "border-white/[0.04] bg-white/[0.01] opacity-35"
                       }`}
                     >
-                      <span className="block font-bold text-[11px]">{tier.label}</span>
-                      <span className="block text-[8px] text-white/40 mt-0.5 font-sans leading-normal">{tier.desc}</span>
+                      <span className="block font-bold text-[11px]">{tierLabel}</span>
+                      <span className="block text-[8px] text-white/40 mt-0.5 font-sans leading-normal">{tierDesc}</span>
                     </div>
                   );
                 })}
@@ -630,13 +802,15 @@ export default function BrandGuidelinesPage() {
           {/* Platforms & Formats Details */}
           <div className="glass p-6 space-y-5">
             <h3 className="text-sm font-bold text-white flex items-center gap-2 heading-brutal border-b border-white/[0.06] pb-4">
-              <Layers className="h-4 w-4 text-[#ffaa00]/60" /> Channels & Formats
+              <Layers className="h-4 w-4 text-[#ffaa00]/60" /> {lang === "en" ? "Channels & Formats" : "Canales y Formatos"}
             </h3>
 
             <div className="space-y-4 max-h-[380px] overflow-y-auto pr-1">
               {form.platforms.length === 0 ? (
                 <p className="text-xs text-white/35 text-center py-6">
-                  No active channels. Go through Onboarding setup to configure active publishing channels.
+                  {lang === "en"
+                    ? "No active channels. Go through Onboarding setup to configure active publishing channels."
+                    : "No hay canales activos. Realiza el Onboarding para configurar tus canales activos."}
                 </p>
               ) : (
                 form.platforms.map((platformId) => {
@@ -654,15 +828,22 @@ export default function BrandGuidelinesPage() {
                       </div>
 
                       <div className="space-y-1">
-                        <span className="text-[8px] font-bold text-[#00d4ff] uppercase tracking-wider font-mono">Tact strategist guideline</span>
-                        <p className="text-[10px] text-white/50 leading-relaxed font-sans">{details.focus}</p>
+                        <span className="text-[8px] font-bold text-[#00d4ff] uppercase tracking-wider font-mono">{lang === "en" ? "Tact strategist guideline" : "Directriz estratégica de Tact"}</span>
+                        <p className="text-[10px] text-white/50 leading-relaxed font-sans">
+                          {lang === "es" && PLATFORM_TRANSLATIONS[platformId]?.focus
+                            ? PLATFORM_TRANSLATIONS[platformId].focus
+                            : details.focus}
+                        </p>
                       </div>
 
                       <div className="space-y-2">
-                        <span className="text-[8px] font-bold text-white/40 uppercase tracking-wider font-mono">Active Formats</span>
+                        <span className="text-[8px] font-bold text-white/40 uppercase tracking-wider font-mono">{lang === "en" ? "Active Formats" : "Formatos Activos"}</span>
                         <div className="flex flex-wrap gap-1">
                           {details.formats.map((fmt) => {
                             const isFmtActive = formatsSelected.includes(fmt.id);
+                            const localizedFmtLabel = lang === "es" && PLATFORM_TRANSLATIONS[platformId]?.formats[fmt.id]
+                              ? PLATFORM_TRANSLATIONS[platformId].formats[fmt.id]
+                              : fmt.label;
                             return (
                               <button
                                 key={fmt.id}
@@ -674,7 +855,7 @@ export default function BrandGuidelinesPage() {
                                     : "bg-white/[0.02] border-white/[0.04] text-white/30"
                                 }`}
                               >
-                                {fmt.label}
+                                {localizedFmtLabel}
                               </button>
                             );
                           })}
@@ -690,11 +871,14 @@ export default function BrandGuidelinesPage() {
           {/* Content Verticals */}
           <div className="glass p-6 space-y-4">
             <h3 className="text-sm font-bold text-white flex items-center gap-2 heading-brutal border-b border-white/[0.06] pb-4">
-              <Hash className="h-4 w-4 text-pink-400" /> Content Verticals
+              <Hash className="h-4 w-4 text-pink-400" /> {lang === "en" ? "Content Verticals" : "Verticales de Contenido"}
             </h3>
             <div className="grid grid-cols-2 gap-3">
               {VERTICALS.map((v) => {
                 const isActive = form.contentVerticals.includes(v.id);
+                const localizedVLabel = lang === "es"
+                  ? (v.id === "education" ? "Educación" : v.id === "curiosity" ? "Curiosidad" : v.id === "inspiration" ? "Inspiración" : v.id === "authority" ? "Autoridad" : v.id === "sale" ? "Ventas" : "Entretenimiento")
+                  : v.label;
                 return (
                   <button
                     key={v.id}
@@ -705,7 +889,7 @@ export default function BrandGuidelinesPage() {
                         : "bg-white/[0.04] border-white/[0.08] text-white/45 hover:text-white hover:border-white/[0.15]"
                     }`}
                   >
-                    {v.label}
+                    {localizedVLabel}
                   </button>
                 );
               })}
@@ -717,10 +901,12 @@ export default function BrandGuidelinesPage() {
       {/* Brand Intelligence & Learning Card */}
       <div className="glass p-6 space-y-4 max-w-4xl">
         <h3 className="text-sm font-bold text-white flex items-center gap-2 heading-brutal border-b border-white/[0.06] pb-4">
-          <Sparkles className="h-4 w-4 text-purple-400" /> Brand Intelligence & Agent Memory
+          <Sparkles className="h-4 w-4 text-purple-400" /> {t("brandMemoryIntelligence")}
         </h3>
         <p className="text-xs text-white/40 leading-relaxed">
-          This repository acts as the long-term memory for Hermes. Hermes logs performance insights, campaign learnings, and target audience feedback here, keeping all content strategically aligned.
+          {lang === "en"
+            ? "This repository acts as the long-term memory for Hermes. Hermes logs performance insights, campaign learnings, and target audience feedback here, keeping all content strategically aligned."
+            : "Este repositorio actúa como la memoria a largo plazo para Hermes. Hermes registra perspectivas de rendimiento, aprendizajes de campaña y comentarios del público objetivo aquí, manteniendo todo el contenido estratégicamente al cien por ciento alineado."}
         </p>
 
         {/* Add Memory Form */}
