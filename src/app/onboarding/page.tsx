@@ -196,6 +196,7 @@ export default function OnboardingPage() {
   const [auditRecommendations, setAuditRecommendations] = useState<any[]>([]);
   const [appliedRecommendations, setAppliedRecommendations] = useState<string[]>([]);
   const [excludedCountryInput, setExcludedCountryInput] = useState("");
+  const [auditError, setAuditError] = useState("");
 
   const [form, setForm] = useState({
     name: "",
@@ -207,7 +208,7 @@ export default function OnboardingPage() {
     contentVerticals: [] as string[],
     targetAudience: {
       genders: { men: 50, women: 50 },
-      socioEconomic: { ab: 25, cplus: 25, c: 50, de: 0 },
+      socioEconomic: [] as string[],
       regions: [] as string[],
       countries: [] as string[],
       excludedCountries: [] as string[],
@@ -221,24 +222,28 @@ export default function OnboardingPage() {
       ? { men: ta.genders.men ?? 50, women: ta.genders.women ?? 50 }
       : { men: 50, women: 50 };
 
-    let socioEconomic = { ab: 25, cplus: 25, c: 50, de: 0 };
+    let socioEconomic: string[] = [];
     if (ta && ta.socioEconomic) {
-      if (typeof ta.socioEconomic === "object") {
-        socioEconomic = {
-          ab: ta.socioEconomic.ab ?? 25,
-          cplus: ta.socioEconomic.cplus ?? 25,
-          c: ta.socioEconomic.c ?? 50,
-          de: ta.socioEconomic.de ?? 0
-        };
+      if (Array.isArray(ta.socioEconomic)) {
+        socioEconomic = ta.socioEconomic;
       } else if (typeof ta.socioEconomic === "string") {
         if (ta.socioEconomic === "luxury") {
-          socioEconomic = { ab: 80, cplus: 20, c: 0, de: 0 };
+          socioEconomic = ["ab"];
         } else if (ta.socioEconomic === "high") {
-          socioEconomic = { ab: 30, cplus: 50, c: 20, de: 0 };
+          socioEconomic = ["ab", "cplus"];
         } else if (ta.socioEconomic === "medium") {
-          socioEconomic = { ab: 10, cplus: 20, c: 70, de: 0 };
+          socioEconomic = ["cplus", "c"];
+        } else {
+          socioEconomic = [ta.socioEconomic];
         }
+      } else if (typeof ta.socioEconomic === "object") {
+        if (ta.socioEconomic.ab > 0) socioEconomic.push("ab");
+        if (ta.socioEconomic.cplus > 0) socioEconomic.push("cplus");
+        if (ta.socioEconomic.c > 0) socioEconomic.push("c");
+        if (ta.socioEconomic.de > 0) socioEconomic.push("de");
       }
+    } else {
+      socioEconomic = ["cplus", "c"];
     }
 
     const regions = ta?.regions || [];
@@ -385,7 +390,7 @@ export default function OnboardingPage() {
       ...prev,
       targetAudience: {
         ...prev.targetAudience,
-        socioEconomic: { ab: 25, cplus: 25, c: 50, de: 0 }
+        socioEconomic: ["ab", "cplus", "c", "de"]
       }
     }));
   };
@@ -447,6 +452,7 @@ export default function OnboardingPage() {
     setAuditing(true);
     setAuditRecommendations([]);
     setAppliedRecommendations([]);
+    setAuditError("");
     try {
       const res = await fetch("/api/generate/audit", {
         method: "POST",
@@ -467,14 +473,20 @@ export default function OnboardingPage() {
 
       if (res.ok) {
         const data = await res.json();
-        if (data.recommendations) {
+        if (data.recommendations && data.recommendations.length > 0) {
           setAuditRecommendations(data.recommendations);
           // Auto-select all recommendations by default
           setAppliedRecommendations(data.recommendations.map((r: any) => r.id));
+        } else {
+          setAuditError("No se encontraron sugerencias. ¡Tu configuración actual parece sólida!");
         }
+      } else {
+        const errData = await res.json().catch(() => ({}));
+        setAuditError(errData.error || "Fallo al comunicar con la IA de TACT. Intente de nuevo.");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("AI Audit error:", err);
+      setAuditError(err.message || "Error de red al conectar con el servicio.");
     } finally {
       setAuditing(false);
     }
@@ -566,10 +578,13 @@ export default function OnboardingPage() {
       if (res.ok) {
         router.push("/dashboard");
       } else {
-        router.push("/dashboard");
+        const errorData = await res.json().catch(() => ({}));
+        console.error("Save failed:", errorData.error);
+        alert(`Error al guardar configuración: ${errorData.error || "Error interno del servidor"}`);
       }
-    } catch {
-      router.push("/dashboard");
+    } catch (err: any) {
+      console.error("Save error:", err);
+      alert(`Error de red al guardar: ${err.message}`);
     } finally {
       setSubmitting(false);
     }
@@ -588,11 +603,6 @@ export default function OnboardingPage() {
   };
 
   const availableCountries = getAvailableCountries();
-
-  const socioEconomicTotal = form.targetAudience.socioEconomic.ab +
-    form.targetAudience.socioEconomic.cplus +
-    form.targetAudience.socioEconomic.c +
-    form.targetAudience.socioEconomic.de;
 
   return (
     <div className="min-h-screen grid-bg flex flex-col items-center justify-center p-4 sm:p-6 relative z-10 select-none">
@@ -859,62 +869,55 @@ export default function OnboardingPage() {
                 </div>
               </div>
 
-              {/* Socio-economic split */}
+              {/* Socio-economic select */}
               <div className="space-y-3 pt-2">
                 <div className="flex justify-between items-center">
-                  <span className="text-[9px] text-white/30 font-semibold font-mono uppercase tracking-[0.15em]">Socio-Economic Split</span>
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={balanceSocioEconomic}
-                      className="text-[9px] font-mono text-purple-400 hover:text-purple-300 underline"
-                    >
-                      Reset default (Balanced)
-                    </button>
-                    <span className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded-full ${
-                      socioEconomicTotal === 100
-                        ? "bg-[#00ff88]/10 text-[#00ff88] border border-[#00ff88]/20"
-                        : "bg-red-500/10 text-red-400 border border-red-500/20"
-                    }`}>
-                      Total: {socioEconomicTotal}% (Requires 100%)
-                    </span>
-                  </div>
+                  <span className="text-[9px] text-white/30 font-semibold font-mono uppercase tracking-[0.15em]">Nivel Socioeconómico</span>
+                  <button
+                    type="button"
+                    onClick={balanceSocioEconomic}
+                    className="text-[9px] font-mono text-purple-400 hover:text-purple-300 underline"
+                  >
+                    Select All (Wide Target)
+                  </button>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {[
-                    { key: "ab", label: "A/B (Luxury / High Class)", color: "#00ff88" },
-                    { key: "cplus", label: "C+ (Premium / Upper Mid)", color: "#00d4ff" },
-                    { key: "c", label: "C (Middle Class / Mass)", color: "#a855f7" },
-                    { key: "de", label: "D/E (Low Cost / Lower Class)", color: "#f43f5e" },
-                  ].map((tier) => (
-                    <div key={tier.key} className="glass p-3 rounded-xl border border-white/[0.04] space-y-2">
-                      <div className="flex justify-between text-[11px] font-mono">
-                        <span className="text-white/60">{tier.label}</span>
-                        <span className="text-white font-bold">{(form.targetAudience.socioEconomic as any)[tier.key]}%</span>
-                      </div>
-                      <input
-                        type="range"
-                        min="0"
-                        max="100"
-                        value={(form.targetAudience.socioEconomic as any)[tier.key]}
-                        onChange={(e) => {
-                          const val = parseInt(e.target.value);
+                    { id: "ab", label: "A/B (Luxury / Alto)", desc: "Consumidores de lujo y alto nivel adquisitivo" },
+                    { id: "cplus", label: "C+ (Premium)", desc: "Clase media alta con preferencia por lo premium" },
+                    { id: "c", label: "C (Clase Media)", desc: "Mercado masivo con foco en relación calidad-precio" },
+                    { id: "de", label: "D/E (Bajo Costo)", desc: "Consumidores con presupuesto muy ajustado" },
+                  ].map((tier) => {
+                    const isSelected = form.targetAudience.socioEconomic.includes(tier.id);
+                    return (
+                      <button
+                        key={tier.id}
+                        type="button"
+                        onClick={() => {
+                          const current = form.targetAudience.socioEconomic;
+                          const updated = current.includes(tier.id)
+                            ? current.filter((t) => t !== tier.id)
+                            : [...current, tier.id];
                           setForm((prev) => ({
                             ...prev,
                             targetAudience: {
                               ...prev.targetAudience,
-                              socioEconomic: {
-                                ...prev.targetAudience.socioEconomic,
-                                [tier.key]: val
-                              }
+                              socioEconomic: updated
                             }
                           }));
                         }}
-                        className="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-[#00ff88]"
-                      />
-                    </div>
-                  ))}
+                        className={`rounded-xl border p-4 text-left transition-all duration-300 ${
+                          isSelected
+                            ? "bg-cyan-500/10 border-cyan-500/25 text-cyan-400"
+                            : "bg-white/[0.02] border-white/[0.06] text-white/45 hover:text-white"
+                        }`}
+                      >
+                        <span className="block font-bold text-xs">{tier.label}</span>
+                        <span className="block text-[9px] text-white/30 mt-1 leading-normal font-sans">{tier.desc}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -1204,6 +1207,12 @@ export default function OnboardingPage() {
                   </Button>
                 </div>
 
+                {auditError && (
+                  <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-3 text-xs text-red-400 font-mono">
+                    Error al auditar: {auditError}
+                  </div>
+                )}
+
                 {auditRecommendations.length > 0 ? (
                   <div className="space-y-3.5 pt-2 animate-fade-in">
                     <p className="text-[10px] text-white/50 font-sans italic">
@@ -1280,7 +1289,10 @@ export default function OnboardingPage() {
                       <span className="text-white/30">Exclusions:</span> {form.targetAudience.excludedCountries.join(", ") || "None"}
                     </div>
                     <div className="sm:col-span-2">
-                      <span className="text-white/30">Socio-Economic:</span> A/B (Luxury) {form.targetAudience.socioEconomic.ab}%, C+ (Premium) {form.targetAudience.socioEconomic.cplus}%, C (Mass) {form.targetAudience.socioEconomic.c}%, D/E (Low) {form.targetAudience.socioEconomic.de}%
+                      <span className="text-white/30">Nivel Socioeconómico:</span>{" "}
+                      <span className="text-white font-bold capitalize">
+                        {form.targetAudience.socioEconomic.join(", ") || "Todos"}
+                      </span>
                     </div>
                   </div>
                 </ReviewSection>
@@ -1343,7 +1355,7 @@ export default function OnboardingPage() {
             <Button
               type="button"
               onClick={() => setStep((s) => s + 1)}
-              disabled={!canProceed() || (step === 1 && socioEconomicTotal !== 100)}
+              disabled={!canProceed() || (step === 1 && form.targetAudience.socioEconomic.length === 0)}
               className="bg-[#00ff88] hover:bg-[#00cc6a] text-[#0a0a1a] font-bold disabled:opacity-20 disabled:cursor-not-allowed transition-all duration-300 glow-sm hover:scale-[1.02] shadow-[0_0_20px_rgba(0,255,136,0.15)] rounded-xl text-xs"
             >
               Continue

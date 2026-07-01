@@ -158,7 +158,7 @@ export default function BrandGuidelinesPage() {
     contentVerticals: [] as string[],
     targetAudience: {
       genders: { men: 50, women: 50 },
-      socioEconomic: { ab: 25, cplus: 25, c: 50, de: 0 },
+      socioEconomic: [] as string[],
       regions: [] as string[],
       countries: [] as string[],
       excludedCountries: [] as string[],
@@ -172,24 +172,28 @@ export default function BrandGuidelinesPage() {
       ? { men: ta.genders.men ?? 50, women: ta.genders.women ?? 50 }
       : { men: 50, women: 50 };
 
-    let socioEconomic = { ab: 25, cplus: 25, c: 50, de: 0 };
+    let socioEconomic: string[] = [];
     if (ta && ta.socioEconomic) {
-      if (typeof ta.socioEconomic === "object") {
-        socioEconomic = {
-          ab: ta.socioEconomic.ab ?? 25,
-          cplus: ta.socioEconomic.cplus ?? 25,
-          c: ta.socioEconomic.c ?? 50,
-          de: ta.socioEconomic.de ?? 0
-        };
+      if (Array.isArray(ta.socioEconomic)) {
+        socioEconomic = ta.socioEconomic;
       } else if (typeof ta.socioEconomic === "string") {
         if (ta.socioEconomic === "luxury") {
-          socioEconomic = { ab: 80, cplus: 20, c: 0, de: 0 };
+          socioEconomic = ["ab"];
         } else if (ta.socioEconomic === "high") {
-          socioEconomic = { ab: 30, cplus: 50, c: 20, de: 0 };
+          socioEconomic = ["ab", "cplus"];
         } else if (ta.socioEconomic === "medium") {
-          socioEconomic = { ab: 10, cplus: 20, c: 70, de: 0 };
+          socioEconomic = ["cplus", "c"];
+        } else {
+          socioEconomic = [ta.socioEconomic];
         }
+      } else if (typeof ta.socioEconomic === "object") {
+        if (ta.socioEconomic.ab > 0) socioEconomic.push("ab");
+        if (ta.socioEconomic.cplus > 0) socioEconomic.push("cplus");
+        if (ta.socioEconomic.c > 0) socioEconomic.push("c");
+        if (ta.socioEconomic.de > 0) socioEconomic.push("de");
       }
+    } else {
+      socioEconomic = ["cplus", "c"];
     }
 
     const regions = ta?.regions || [];
@@ -591,26 +595,28 @@ export default function BrandGuidelinesPage() {
               </div>
             </div>
 
-            {/* Socio-Economic split progress bars */}
-            <div className="space-y-3.5 pt-4 border-t border-white/[0.04]">
-              <span className="text-[10px] text-white/30 font-bold uppercase tracking-wider font-mono">Socio-Economic Split</span>
-              <div className="grid grid-cols-2 gap-x-6 gap-y-3">
+            {/* Socio-Economic split badges */}
+            <div className="space-y-3 pt-4 border-t border-white/[0.04]">
+              <span className="text-[10px] text-white/30 font-bold uppercase tracking-wider font-mono block">Socio-Economic Focus</span>
+              <div className="grid grid-cols-2 gap-3">
                 {[
-                  { key: "ab", label: "A/B (Luxury / High)", color: "bg-[#00ff88]" },
-                  { key: "cplus", label: "C+ (Premium)", color: "bg-[#00d4ff]" },
-                  { key: "c", label: "C (Mass Market)", color: "bg-purple-500" },
-                  { key: "de", label: "D/E (Low Cost)", color: "bg-rose-500" },
+                  { id: "ab", label: "A/B (Luxury / Alto)", desc: "Consumidores de lujo y alto nivel adquisitivo", color: "text-[#00ff88] border-[#00ff88]/20 bg-[#00ff88]/5" },
+                  { id: "cplus", label: "C+ (Premium)", desc: "Clase media alta con preferencia por lo premium", color: "text-[#00d4ff] border-[#00d4ff]/20 bg-[#00d4ff]/5" },
+                  { id: "c", label: "C (Clase Media)", desc: "Mercado masivo con foco en calidad-precio", color: "text-purple-400 border-purple-500/20 bg-purple-500/5" },
+                  { id: "de", label: "D/E (Bajo Costo)", desc: "Mercado de bajo costo o presupuesto ajustado", color: "text-rose-400 border-rose-500/20 bg-rose-500/5" },
                 ].map((tier) => {
-                  const val = (form.targetAudience.socioEconomic as any)[tier.key] || 0;
+                  const isActive = form.targetAudience.socioEconomic.includes(tier.id);
                   return (
-                    <div key={tier.key} className="space-y-1">
-                      <div className="flex justify-between text-[10px] font-mono">
-                        <span className="text-white/50">{tier.label}</span>
-                        <span className="text-white font-bold">{val}%</span>
-                      </div>
-                      <div className="h-1.5 bg-white/5 rounded-full overflow-hidden w-full">
-                        <div style={{ width: `${val}%` }} className={`h-full ${tier.color}`} />
-                      </div>
+                    <div
+                      key={tier.id}
+                      className={`rounded-xl border p-3 transition-all ${
+                        isActive
+                          ? `${tier.color} shadow-[0_0_12px_rgba(255,255,255,0.02)]`
+                          : "border-white/[0.04] bg-white/[0.01] opacity-35"
+                      }`}
+                    >
+                      <span className="block font-bold text-[11px]">{tier.label}</span>
+                      <span className="block text-[8px] text-white/40 mt-0.5 font-sans leading-normal">{tier.desc}</span>
                     </div>
                   );
                 })}

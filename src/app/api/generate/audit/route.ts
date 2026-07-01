@@ -100,6 +100,13 @@ Schema:
     }
     cleanText = cleanText.trim();
 
+    // Robust extraction search for the JSON array boundaries
+    const startIndex = cleanText.indexOf('[');
+    const endIndex = cleanText.lastIndexOf(']');
+    if (startIndex !== -1 && endIndex !== -1 && endIndex > startIndex) {
+      cleanText = cleanText.substring(startIndex, endIndex + 1);
+    }
+
     const recommendations = JSON.parse(cleanText);
     return NextResponse.json({ recommendations });
   } catch (error: any) {
