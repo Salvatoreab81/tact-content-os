@@ -17,6 +17,10 @@ import {
   Users,
   Video,
   Briefcase,
+  History,
+  ArrowRight,
+  Eye,
+  RotateCcw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -140,6 +144,11 @@ export default function BrandGuidelinesPage() {
   const [newMemory, setNewMemory] = useState({ title: "", content: "", category: "strategy" });
   const [addingMemory, setAddingMemory] = useState(false);
 
+  // Version History State
+  const [historyList, setHistoryList] = useState<any[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(true);
+  const [selectedHistoryVer, setSelectedHistoryVer] = useState<any>(null);
+
   const [form, setForm] = useState({
     name: "",
     industry: "",
@@ -148,13 +157,48 @@ export default function BrandGuidelinesPage() {
     platforms: [] as string[],
     contentVerticals: [] as string[],
     targetAudience: {
-      genders: [] as string[],
+      genders: { men: 50, women: 50 },
+      socioEconomic: { ab: 25, cplus: 25, c: 50, de: 0 },
+      regions: [] as string[],
+      countries: [] as string[],
+      excludedCountries: [] as string[],
       generations: [] as string[],
-      socioEconomic: "medium",
-      markets: [] as string[],
     },
     platformDetails: {} as Record<string, { formats: string[] }>
   });
+
+  const parseTargetAudience = (ta: any, marketsFallback: string[]) => {
+    const genders = (ta && typeof ta.genders === "object" && !Array.isArray(ta.genders))
+      ? { men: ta.genders.men ?? 50, women: ta.genders.women ?? 50 }
+      : { men: 50, women: 50 };
+
+    let socioEconomic = { ab: 25, cplus: 25, c: 50, de: 0 };
+    if (ta && ta.socioEconomic) {
+      if (typeof ta.socioEconomic === "object") {
+        socioEconomic = {
+          ab: ta.socioEconomic.ab ?? 25,
+          cplus: ta.socioEconomic.cplus ?? 25,
+          c: ta.socioEconomic.c ?? 50,
+          de: ta.socioEconomic.de ?? 0
+        };
+      } else if (typeof ta.socioEconomic === "string") {
+        if (ta.socioEconomic === "luxury") {
+          socioEconomic = { ab: 80, cplus: 20, c: 0, de: 0 };
+        } else if (ta.socioEconomic === "high") {
+          socioEconomic = { ab: 30, cplus: 50, c: 20, de: 0 };
+        } else if (ta.socioEconomic === "medium") {
+          socioEconomic = { ab: 10, cplus: 20, c: 70, de: 0 };
+        }
+      }
+    }
+
+    const regions = ta?.regions || [];
+    const countries = ta?.countries || ta?.markets || marketsFallback || [];
+    const excludedCountries = ta?.excludedCountries || [];
+    const generations = ta?.generations || [];
+
+    return { genders, socioEconomic, regions, countries, excludedCountries, generations };
+  };
 
   useEffect(() => {
     async function fetchBrandData() {
@@ -172,12 +216,7 @@ export default function BrandGuidelinesPage() {
               markets: current.markets || [],
               platforms: current.platforms || [],
               contentVerticals: current.content_verticals || current.contentVerticals || [],
-              targetAudience: current.target_audience || current.targetAudience || {
-                genders: [],
-                generations: [],
-                socioEconomic: "medium",
-                markets: current.markets || []
-              },
+              targetAudience: parseTargetAudience(current.target_audience || current.targetAudience, current.markets || []),
               platformDetails: current.platform_details || current.platformDetails || {}
             });
           }
@@ -206,6 +245,25 @@ export default function BrandGuidelinesPage() {
     fetchBrandData();
     fetchMemories();
   }, []);
+
+  // Fetch version history when brand is loaded
+  useEffect(() => {
+    if (!brand) return;
+    async function fetchHistory() {
+      try {
+        const res = await fetch("/api/brands/history");
+        if (res.ok) {
+          const data = await res.json();
+          setHistoryList(data || []);
+        }
+      } catch (err) {
+        console.error("Failed to load history list:", err);
+      } finally {
+        setLoadingHistory(false);
+      }
+    }
+    fetchHistory();
+  }, [brand]);
 
   const handleAddMemory = async () => {
     if (!newMemory.title || !newMemory.content) return;
@@ -238,10 +296,10 @@ export default function BrandGuidelinesPage() {
     setSaving(true);
     setSaveSuccess(false);
     try {
-      // Sync markets root list with targetAudience markets
+      // Sync markets root list with targetAudience countries/regions
       const payload = {
         ...form,
-        markets: form.targetAudience.markets,
+        markets: form.targetAudience.countries.length > 0 ? form.targetAudience.countries : form.targetAudience.regions,
       };
 
       const res = await fetch(`/api/brands/${brand.slug}`, {
@@ -252,11 +310,37 @@ export default function BrandGuidelinesPage() {
       if (res.ok) {
         setSaveSuccess(true);
         setTimeout(() => setSaveSuccess(false), 3000);
+        // Refresh history list
+        const histRes = await fetch("/api/brands/history");
+        if (histRes.ok) {
+          const data = await histRes.json();
+          setHistoryList(data || []);
+        }
       }
     } catch (err) {
       console.error("Error saving brand details:", err);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleRestore = async (versionId: string) => {
+    setSaving(true);
+    try {
+      const res = await fetch("/api/brands/history", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ versionId }),
+      });
+      if (res.ok) {
+        // Refresh page completely to load restored guidelines
+        window.location.reload();
+      }
+    } catch (err) {
+      console.error("Restore failed:", err);
+    } finally {
+      setSaving(false);
+      setSelectedHistoryVer(null);
     }
   };
 
@@ -282,32 +366,6 @@ export default function BrandGuidelinesPage() {
         platformDetails: updatedDetails
       };
     });
-  };
-
-  const toggleAudienceItem = (field: "genders" | "generations" | "markets", value: string) => {
-    setForm((prev) => {
-      const current = prev.targetAudience[field] || [];
-      const updated = current.includes(value)
-        ? current.filter((x) => x !== value)
-        : [...current, value];
-      return {
-        ...prev,
-        targetAudience: {
-          ...prev.targetAudience,
-          [field]: updated
-        }
-      };
-    });
-  };
-
-  const selectSocioEconomic = (value: string) => {
-    setForm((prev) => ({
-      ...prev,
-      targetAudience: {
-        ...prev.targetAudience,
-        socioEconomic: value
-      }
-    }));
   };
 
   const togglePlatformFormat = (platformId: string, formatId: string) => {
@@ -357,7 +415,8 @@ export default function BrandGuidelinesPage() {
   }
 
   return (
-    <div className="p-8 sm:p-10 lg:p-12 section-container space-y-8 select-none">
+    <div className="p-8 sm:p-10 lg:p-12 section-container space-y-8 select-none relative">
+      
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -448,182 +507,114 @@ export default function BrandGuidelinesPage() {
           </div>
 
           {/* Target Audience / Segmentation Card */}
-          <div className="glass p-6 space-y-5">
+          <div className="glass p-6 space-y-6">
             <h3 className="text-sm font-bold text-white flex items-center gap-2 heading-brutal border-b border-white/[0.06] pb-4">
               <Globe className="h-4 w-4 text-purple-400" /> Target Audience Demographics
             </h3>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 text-xs">
-              {/* Gender target */}
-              <div className="space-y-2">
-                <span className="text-[10px] text-white/30 font-bold uppercase tracking-wider font-mono">Gender Group</span>
-                <div className="flex gap-2">
-                  {["both", "men", "women"].map((g) => {
-                    const isSelected = form.targetAudience.genders.includes(g);
-                    return (
-                      <button
-                        key={g}
-                        type="button"
-                        onClick={() => toggleAudienceItem("genders", g)}
-                        className={`rounded-lg px-3 py-1.5 font-bold capitalize transition-all ${
-                          isSelected
-                            ? "bg-purple-500/10 border border-purple-500/25 text-purple-400"
-                            : "bg-white/[0.02] border border-white/[0.06] text-white/35"
-                        }`}
-                      >
-                        {g}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Economic level */}
-              <div className="space-y-2">
-                <span className="text-[10px] text-white/30 font-bold uppercase tracking-wider font-mono">Socio-Economic Tier</span>
-                <div className="flex gap-2">
-                  {["medium", "high", "luxury"].map((t) => {
-                    const isSelected = form.targetAudience.socioEconomic === t;
-                    return (
-                      <button
-                        key={t}
-                        type="button"
-                        onClick={() => selectSocioEconomic(t)}
-                        className={`rounded-lg px-3 py-1.5 font-bold capitalize transition-all ${
-                          isSelected
-                            ? "bg-cyan-500/10 border border-cyan-500/25 text-cyan-400"
-                            : "bg-white/[0.02] border border-white/[0.06] text-white/35"
-                        }`}
-                      >
-                        {t}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-
-            {/* Generations target */}
-            <div className="space-y-2">
-              <span className="text-[10px] text-white/30 font-bold uppercase tracking-wider font-mono">Target Generations</span>
-              <div className="flex flex-wrap gap-2">
-                {[
-                  { id: "gen_z", label: "Gen Z" },
-                  { id: "millennials", label: "Millennials" },
-                  { id: "gen_x", label: "Gen X" },
-                  { id: "boomers", label: "Boomers" },
-                ].map((gen) => {
-                  const isSelected = form.targetAudience.generations.includes(gen.id);
-                  return (
-                    <button
-                      key={gen.id}
-                      type="button"
-                      onClick={() => toggleAudienceItem("generations", gen.id)}
-                      className={`rounded-lg px-3.5 py-2 text-xs font-bold transition-all ${
-                        isSelected
-                          ? "bg-[#00ff88]/10 border border-[#00ff88]/25 text-[#00ff88]"
-                          : "bg-white/[0.02] border border-white/[0.06] text-white/40"
-                      }`}
-                    >
-                      {gen.label}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Markets List */}
+            {/* Geographic Markets */}
             <div className="space-y-2">
               <span className="text-[10px] text-white/30 font-bold uppercase tracking-wider font-mono">Markets & Geographic Focus</span>
               <div className="flex flex-wrap gap-1.5">
-                {form.targetAudience.markets.map((m) => (
+                {form.targetAudience.regions.map((reg) => (
+                  <Badge
+                    key={reg}
+                    variant="outline"
+                    className="rounded-lg bg-cyan-500/10 border border-cyan-500/20 px-2.5 py-1 text-xs text-cyan-400 font-mono capitalize"
+                  >
+                    Region: {reg}
+                  </Badge>
+                ))}
+                {form.targetAudience.countries.map((m) => (
                   <Badge
                     key={m}
                     variant="outline"
-                    className="rounded-lg bg-white/[0.04] border border-white/[0.08] px-2.5 py-1 text-xs text-white/70 font-mono flex items-center gap-1.5"
+                    className="rounded-lg bg-white/[0.04] border border-white/[0.08] px-2.5 py-1 text-xs text-white/70 font-mono"
                   >
                     {m}
-                    <button
-                      onClick={() => toggleAudienceItem("markets", m)}
-                      className="text-white/30 hover:text-white/80 transition-colors"
-                    >
-                      ×
-                    </button>
                   </Badge>
                 ))}
               </div>
             </div>
-          </div>
 
-          {/* Brand Intelligence & Learning Card */}
-          <div className="glass p-6 space-y-4">
-            <h3 className="text-sm font-bold text-white flex items-center gap-2 heading-brutal border-b border-white/[0.06] pb-4">
-              <Sparkles className="h-4 w-4 text-purple-400" /> Brand Intelligence & Agent Memory
-            </h3>
-            <p className="text-xs text-white/40 leading-relaxed">
-              This repository acts as the long-term memory for Hermes. Hermes logs performance insights, campaign learnings, and target audience feedback here, keeping all content strategically aligned.
-            </p>
-
-            {/* Add Memory Form */}
-            <div className="rounded-xl border border-white/[0.08] bg-white/[0.02] p-4 space-y-3">
-              <p className="text-[10px] font-bold text-white/50 uppercase tracking-wider font-mono">Log Strategy Override / Learning</p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <Input
-                  placeholder="Insight Title (e.g. Reels peak hour)"
-                  value={newMemory.title}
-                  onChange={(e) => setNewMemory({ ...newMemory, title: e.target.value })}
-                  className="glass-input h-9 text-xs"
-                />
-                <select
-                  value={newMemory.category}
-                  onChange={(e) => setNewMemory({ ...newMemory, category: e.target.value })}
-                  className="rounded-xl glass-select px-3 py-1.5 text-xs"
-                >
-                  <option value="strategy">Strategy</option>
-                  <option value="audience">Audience Insight</option>
-                  <option value="performance">Performance</option>
-                  <option value="style">Style Guideline</option>
-                </select>
+            {/* Excluded Markets */}
+            {form.targetAudience.excludedCountries?.length > 0 && (
+              <div className="space-y-2 pt-1 border-t border-white/[0.04]">
+                <span className="text-[10px] text-red-400 font-bold uppercase tracking-wider font-mono">Excluded Markets</span>
+                <div className="flex flex-wrap gap-1.5">
+                  {form.targetAudience.excludedCountries.map((ex) => (
+                    <Badge
+                      key={ex}
+                      variant="outline"
+                      className="rounded-lg bg-red-500/5 border border-red-500/20 px-2.5 py-1 text-xs text-red-400 font-mono"
+                    >
+                      {ex}
+                    </Badge>
+                  ))}
+                </div>
               </div>
-              <textarea
-                rows={2}
-                placeholder="Describe the learning or context override..."
-                value={newMemory.content}
-                onChange={(e) => setNewMemory({ ...newMemory, content: e.target.value })}
-                className="w-full rounded-xl glass-input px-3 py-2 text-xs outline-none resize-none"
-              />
-              <Button
-                size="sm"
-                onClick={handleAddMemory}
-                disabled={addingMemory || !newMemory.title || !newMemory.content}
-                className="bg-purple-500 hover:bg-purple-600 text-white font-bold transition-all duration-300 text-xs py-1"
-              >
-                Log Intelligence
-              </Button>
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2 border-t border-white/[0.04]">
+              {/* Gender ratio split bar */}
+              <div className="space-y-3">
+                <div className="flex justify-between text-xs font-mono font-semibold">
+                  <span className="text-white/40">Gender Distribution</span>
+                  <span className="text-[#00ff88]">
+                    {form.targetAudience.genders.men}% Men / {form.targetAudience.genders.women}% Women
+                  </span>
+                </div>
+                <div className="flex h-2.5 rounded-full overflow-hidden bg-white/10 w-full shadow-inner">
+                  <div style={{ width: `${form.targetAudience.genders.men}%` }} className="bg-[#00ff88]" />
+                  <div style={{ width: `${form.targetAudience.genders.women}%` }} className="bg-purple-500" />
+                </div>
+                <div className="flex justify-between text-[9px] text-white/30 font-mono">
+                  <span>Hombres</span>
+                  <span>Mujeres</span>
+                </div>
+              </div>
+
+              {/* Generations target */}
+              <div className="space-y-2">
+                <span className="text-[10px] text-white/30 font-bold uppercase tracking-wider font-mono block">Target Generations</span>
+                <div className="flex flex-wrap gap-1.5">
+                  {form.targetAudience.generations.map((g) => (
+                    <Badge
+                      key={g}
+                      variant="outline"
+                      className="rounded-lg bg-[#00ff88]/10 border border-[#00ff88]/20 px-2.5 py-1 text-xs text-[#00ff88] font-mono capitalize"
+                    >
+                      {g.replace("_", " ")}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
             </div>
 
-            {/* Memory items */}
-            <div className="space-y-3 pt-2 max-h-[300px] overflow-y-auto pr-1">
-              {loadingMemories ? (
-                <p className="text-xs text-white/30 text-center py-4">Loading intelligence log...</p>
-              ) : memories.length === 0 ? (
-                <p className="text-xs text-white/30 text-center py-4">No intelligence logged yet. Hermes will automatically populate this as it works, or you can log insights manually.</p>
-              ) : (
-                memories.map((m) => (
-                  <div key={m.id} className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <h4 className="text-xs font-bold text-white font-mono">{m.title}</h4>
-                      <span className="text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider font-mono bg-purple-500/10 text-purple-400 border border-purple-500/20">
-                        {m.category}
-                      </span>
+            {/* Socio-Economic split progress bars */}
+            <div className="space-y-3.5 pt-4 border-t border-white/[0.04]">
+              <span className="text-[10px] text-white/30 font-bold uppercase tracking-wider font-mono">Socio-Economic Split</span>
+              <div className="grid grid-cols-2 gap-x-6 gap-y-3">
+                {[
+                  { key: "ab", label: "A/B (Luxury / High)", color: "bg-[#00ff88]" },
+                  { key: "cplus", label: "C+ (Premium)", color: "bg-[#00d4ff]" },
+                  { key: "c", label: "C (Mass Market)", color: "bg-purple-500" },
+                  { key: "de", label: "D/E (Low Cost)", color: "bg-rose-500" },
+                ].map((tier) => {
+                  const val = (form.targetAudience.socioEconomic as any)[tier.key] || 0;
+                  return (
+                    <div key={tier.key} className="space-y-1">
+                      <div className="flex justify-between text-[10px] font-mono">
+                        <span className="text-white/50">{tier.label}</span>
+                        <span className="text-white font-bold">{val}%</span>
+                      </div>
+                      <div className="h-1.5 bg-white/5 rounded-full overflow-hidden w-full">
+                        <div style={{ width: `${val}%` }} className={`h-full ${tier.color}`} />
+                      </div>
                     </div>
-                    <p className="text-xs text-white/60 leading-relaxed font-sans">{m.content}</p>
-                    <p className="text-[9px] text-white/20 font-mono">
-                      Logged: {m.created_at ? (m.created_at.seconds ? new Date(m.created_at.seconds * 1000).toLocaleDateString() : new Date(m.created_at).toLocaleDateString()) : "Just now"}
-                    </p>
-                  </div>
-                ))
-              )}
+                  );
+                })}
+              </div>
             </div>
           </div>
         </div>
@@ -636,7 +627,7 @@ export default function BrandGuidelinesPage() {
               <Layers className="h-4 w-4 text-[#ffaa00]/60" /> Channels & Formats
             </h3>
 
-            <div className="space-y-4 max-h-[480px] overflow-y-auto pr-1">
+            <div className="space-y-4 max-h-[380px] overflow-y-auto pr-1">
               {form.platforms.length === 0 ? (
                 <p className="text-xs text-white/35 text-center py-6">
                   No active channels. Go through Onboarding setup to configure active publishing channels.
@@ -714,6 +705,172 @@ export default function BrandGuidelinesPage() {
               })}
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Brand Intelligence & Learning Card */}
+      <div className="glass p-6 space-y-4 max-w-4xl">
+        <h3 className="text-sm font-bold text-white flex items-center gap-2 heading-brutal border-b border-white/[0.06] pb-4">
+          <Sparkles className="h-4 w-4 text-purple-400" /> Brand Intelligence & Agent Memory
+        </h3>
+        <p className="text-xs text-white/40 leading-relaxed">
+          This repository acts as the long-term memory for Hermes. Hermes logs performance insights, campaign learnings, and target audience feedback here, keeping all content strategically aligned.
+        </p>
+
+        {/* Add Memory Form */}
+        <div className="rounded-xl border border-white/[0.08] bg-white/[0.02] p-4 space-y-3">
+          <p className="text-[10px] font-bold text-white/50 uppercase tracking-wider font-mono">Log Strategy Override / Learning</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <Input
+              placeholder="Insight Title (e.g. Reels peak hour)"
+              value={newMemory.title}
+              onChange={(e) => setNewMemory({ ...newMemory, title: e.target.value })}
+              className="glass-input h-9 text-xs"
+            />
+            <select
+              value={newMemory.category}
+              onChange={(e) => setNewMemory({ ...newMemory, category: e.target.value })}
+              className="rounded-xl glass-select px-3 py-1.5 text-xs"
+            >
+              <option value="strategy">Strategy</option>
+              <option value="audience">Audience Insight</option>
+              <option value="performance">Performance</option>
+              <option value="style">Style Guideline</option>
+            </select>
+          </div>
+          <textarea
+            rows={2}
+            placeholder="Describe the learning or context override..."
+            value={newMemory.content}
+            onChange={(e) => setNewMemory({ ...newMemory, content: e.target.value })}
+            className="w-full rounded-xl glass-input px-3 py-2 text-xs outline-none resize-none"
+          />
+          <Button
+            size="sm"
+            onClick={handleAddMemory}
+            disabled={addingMemory || !newMemory.title || !newMemory.content}
+            className="bg-purple-500 hover:bg-purple-600 text-white font-bold transition-all duration-300 text-xs py-1"
+          >
+            Log Intelligence
+          </Button>
+        </div>
+
+        {/* Memory items */}
+        <div className="space-y-3 pt-2 max-h-[220px] overflow-y-auto pr-1">
+          {loadingMemories ? (
+            <p className="text-xs text-white/30 text-center py-4">Loading intelligence log...</p>
+          ) : memories.length === 0 ? (
+            <p className="text-xs text-white/30 text-center py-4">No intelligence logged yet. Hermes will automatically populate this as it works, or you can log insights manually.</p>
+          ) : (
+            memories.map((m) => (
+              <div key={m.id} className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 space-y-2">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-bold text-white font-mono">{m.title}</h4>
+                  <span className="text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider font-mono bg-purple-500/10 text-purple-400 border border-purple-500/20">
+                    {m.category}
+                  </span>
+                </div>
+                <p className="text-xs text-white/60 leading-relaxed font-sans">{m.content}</p>
+                <p className="text-[9px] text-white/20 font-mono">
+                  Logged: {m.created_at ? (m.created_at.seconds ? new Date(m.created_at.seconds * 1000).toLocaleDateString() : new Date(m.created_at).toLocaleDateString()) : "Just now"}
+                </p>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+
+      {/* Version History & Timeline Section */}
+      <div className="glass p-6 space-y-5 max-w-4xl">
+        <h3 className="text-sm font-bold text-white flex items-center gap-2 heading-brutal border-b border-white/[0.06] pb-4">
+          <History className="h-4 w-4 text-cyan-400 animate-spin-slow" /> Brand Version History & Rollbacks
+        </h3>
+        <p className="text-xs text-white/40 leading-relaxed">
+          TACT records a full version snapshot every time guidelines are changed. Review past presets and roll back or restore previous brand states easily.
+        </p>
+
+        <div className="space-y-3 pt-1 max-h-[300px] overflow-y-auto pr-1">
+          {loadingHistory ? (
+            <p className="text-xs text-white/30 text-center py-4">Loading version history...</p>
+          ) : historyList.length === 0 ? (
+            <p className="text-xs text-white/30 text-center py-4">No historical versions archived yet. Your current setup will create the first history record on next save.</p>
+          ) : (
+            <div className="relative border-l border-white/[0.08] ml-3 pl-6 space-y-5">
+              {historyList.map((ver, idx) => {
+                const isSelected = selectedHistoryVer?.id === ver.id;
+                const timestamp = ver.version_timestamp?.seconds
+                  ? new Date(ver.version_timestamp.seconds * 1000).toLocaleString()
+                  : ver.updated_at?.seconds
+                    ? new Date(ver.updated_at.seconds * 1000).toLocaleString()
+                    : "Unknown date";
+
+                return (
+                  <div key={ver.id} className="relative group">
+                    {/* Timeline dot */}
+                    <div className="absolute -left-9 top-1.5 h-3.5 w-3.5 rounded-full border-2 border-[#0a0a1a] bg-cyan-400 shadow-[0_0_8px_rgba(6,182,212,0.5)] group-hover:scale-110 transition-transform" />
+                    
+                    <div className="glass p-4 rounded-xl border border-white/[0.05] hover:border-white/[0.1] transition-all space-y-2">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div>
+                          <span className="text-[10px] font-bold text-cyan-400 font-mono tracking-wider uppercase">
+                            Version {historyList.length - idx}
+                          </span>
+                          <span className="text-[10px] text-white/30 font-mono ml-3">
+                            {timestamp}
+                          </span>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => setSelectedHistoryVer(isSelected ? null : ver)}
+                            className="text-white/50 hover:text-white text-xs h-7 px-3 bg-white/[0.02] border border-white/[0.04] rounded-lg"
+                          >
+                            <Eye className="h-3 w-3 mr-1" />
+                            {isSelected ? "Hide details" : "View configuration"}
+                          </Button>
+                          <Button
+                            size="sm"
+                            onClick={() => handleRestore(ver.id)}
+                            disabled={saving}
+                            className="bg-cyan-500 hover:bg-cyan-600 text-white font-bold text-xs h-7 px-3 rounded-lg"
+                          >
+                            <RotateCcw className="h-3 w-3 mr-1" />
+                            Restore guidelines
+                          </Button>
+                        </div>
+                      </div>
+
+                      {/* Expanded View past data */}
+                      {isSelected && (
+                        <div className="mt-3 pt-3 border-t border-white/[0.06] grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs animate-fade-in">
+                          <div className="space-y-1.5">
+                            <span className="text-[9px] text-white/30 font-mono uppercase tracking-wider block">Brand & Industry</span>
+                            <p className="text-white font-bold">{ver.name}</p>
+                            <p className="text-white/50 font-sans italic">{ver.industry}</p>
+                          </div>
+                          <div className="space-y-1.5">
+                            <span className="text-[9px] text-white/30 font-mono uppercase tracking-wider block">Tone of Voice Guidelines</span>
+                            <p className="text-white/60 leading-relaxed font-sans">{ver.tone_of_voice || ver.toneOfVoice || "—"}</p>
+                          </div>
+                          <div className="space-y-1.5 sm:col-span-2">
+                            <span className="text-[9px] text-white/30 font-mono uppercase tracking-wider block">Channels & Formats active</span>
+                            <div className="flex flex-wrap gap-1">
+                              {(ver.platforms || []).map((pId: string) => (
+                                <Badge key={pId} variant="outline" className="border-purple-500/20 bg-purple-500/5 text-purple-400 rounded text-[9px] font-mono">
+                                  {pId}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
     </div>

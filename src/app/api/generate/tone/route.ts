@@ -26,9 +26,13 @@ export async function POST(request: NextRequest) {
     const systemPrompt = `You are an expert Brand Identity and Voice Consultant. Your job is to define a precise, high-impact, and strategic tone of voice guideline for brands.`;
 
     const marketsStr = targetAudience?.markets?.length ? targetAudience.markets.join(", ") : "Global";
-    const gendersStr = targetAudience?.genders?.length ? targetAudience.genders.join(", ") : "All genders";
+    const gendersStr = targetAudience?.genders
+      ? `Men: ${targetAudience.genders.men || 50}%, Women: ${targetAudience.genders.women || 50}%`
+      : "Balanced (50% Men, 50% Women)";
     const generationsStr = targetAudience?.generations?.length ? targetAudience.generations.join(", ") : "All generations";
-    const socioEconomicStr = targetAudience?.socioEconomic || "All levels";
+    const socioEconomicStr = targetAudience?.socioEconomic
+      ? `A/B (Luxury): ${targetAudience.socioEconomic.ab || 0}%, C+ (Premium): ${targetAudience.socioEconomic.cplus || 0}%, C (Mass): ${targetAudience.socioEconomic.c || 0}%, D/E (Low Cost): ${targetAudience.socioEconomic.de || 0}%`
+      : "All levels";
     const presetsStr = presets?.length ? presets.join(", ") : "Professional, friendly";
 
     const userPrompt = `Please write a professional, strategic, and high-impact tone of voice guidelines (3 to 4 sentences max) in Spanish for the following brand:

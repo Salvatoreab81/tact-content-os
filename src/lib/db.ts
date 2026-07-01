@@ -52,7 +52,23 @@ export async function updateBrand(slug: string, data: any) {
   if (snapshot.empty) {
     throw new Error(`Brand with slug ${slug} not found`);
   }
-  const docRef = snapshot.docs[0].ref;
+  const brandDoc = snapshot.docs[0];
+  const docRef = brandDoc.ref;
+
+  // 1. Archive current guidelines to 'history' subcollection before overwriting
+  const currentData = brandDoc.data();
+  try {
+    const historyRef = docRef.collection('history').doc();
+    await historyRef.set({
+      ...currentData,
+      version_timestamp: FieldValue.serverTimestamp(),
+      original_doc_id: brandDoc.id
+    });
+  } catch (err) {
+    console.error("Failed to archive brand version in history:", err);
+  }
+
+  // 2. Perform updates
   const updateData: any = {
     updated_at: FieldValue.serverTimestamp()
   };
@@ -77,6 +93,63 @@ export async function updateBrand(slug: string, data: any) {
   await docRef.update(updateData);
   const updatedDoc = await docRef.get();
   return { id: updatedDoc.id, ...updatedDoc.data() };
+}
+
+export async function getBrandHistoryBySlug(slug: string) {
+  const database = getDb();
+  const snapshot = await database.collection('brands').where('slug', '==', slug).limit(1).get();
+  if (snapshot.empty) return [];
+  const brandDoc = snapshot.docs[0];
+  const historySnapshot = await brandDoc.ref.collection('history').orderBy('version_timestamp', 'desc').get();
+  return historySnapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
+}
+
+export async function restoreBrandVersion(slug: string, versionId: string) {
+  const database = getDb();
+  const snapshot = await database.collection('brands').where('slug', '==', slug).limit(1).get();
+  if (snapshot.empty) {
+    throw new Error(`Brand with slug ${slug} not found`);
+  }
+  const brandDoc = snapshot.docs[0];
+  const brandRef = brandDoc.ref;
+
+  // Get version document from history
+  const versionDoc = await brandRef.collection('history').doc(versionId).get();
+  if (!versionDoc.exists) {
+    throw new Error(`Version history document ${versionId} not found`);
+  }
+
+  const versionData = versionDoc.data()!;
+
+  // 1. Archive current guidelines before restoring
+  const currentData = brandDoc.data();
+  try {
+    await brandRef.collection('history').add({
+      ...currentData,
+      version_timestamp: FieldValue.serverTimestamp(),
+      original_doc_id: brandDoc.id
+    });
+  } catch (err) {
+    console.error("Failed to archive before restoring version:", err);
+  }
+
+  // 2. Overwrite the active brand document
+  const restoreData = {
+    name: versionData.name || "",
+    industry: versionData.industry || "",
+    tone_of_voice: versionData.tone_of_voice || versionData.toneOfVoice || "",
+    markets: versionData.markets || [],
+    platforms: versionData.platforms || [],
+    content_verticals: versionData.content_verticals || versionData.contentVerticals || [],
+    target_audience: versionData.target_audience || versionData.targetAudience || null,
+    platform_details: versionData.platform_details || versionData.platformDetails || null,
+    brand_colors: versionData.brand_colors || versionData.brandColors || {},
+    brand_fonts: versionData.brand_fonts || versionData.brandFonts || {},
+    updated_at: FieldValue.serverTimestamp()
+  };
+
+  await brandRef.update(restoreData);
+  return { id: brandDoc.id, ...restoreData, slug };
 }
 
 export async function getAllBrands() {
@@ -135,6 +208,18 @@ export async function createBrand(data: any) {
     created_at: FieldValue.serverTimestamp()
   };
   await ref.set(brandData);
+
+  // Write first history item
+  try {
+    await ref.collection('history').add({
+      ...brandData,
+      version_timestamp: FieldValue.serverTimestamp(),
+      original_doc_id: ref.id
+    });
+  } catch (err) {
+    console.error("Failed to create initial brand history record:", err);
+  }
+
   return { id: ref.id, ...brandData };
 }
 
