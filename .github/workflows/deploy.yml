@@ -16,4 +16,4 @@ jobs:
 
       - name: Trigger Coolify Webhook via Tailnet
         run: |
-          curl -X POST "http://157.180.90.106:8000/api/v1/deploy?uuid=wtp1pfye6mcpa12xzddl6fuu&force=false"
+          curl -X POST "http://100.112.31.122:8000/api/v1/deploy?uuid=wtp1pfye6mcpa12xzddl6fuu&force=false"

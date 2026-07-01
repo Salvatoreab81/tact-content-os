@@ -30,6 +30,8 @@ import {
   AlertCircle,
   Loader2,
   Sparkles,
+  MessageCircle,
+  TrendingUp,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -185,6 +187,10 @@ const VERTICALS = [
   { id: "authority", label: "Authority", icon: Building2, color: "green", desc: "Statistics, credentials, certifications, and why you are the ideal industry expert.", example: "Post: 'Our audited workflow that cut delivery times in half in 2025.'" },
   { id: "sale", label: "Sale", icon: ShoppingCart, color: "red", desc: "Direct offers, product launches, and clear commercial calls to action.", example: "Post: 'Our new PetJewels collection is finally here. Get 15% off today only!'" },
   { id: "entertainment", label: "Entertainment", icon: Smile, color: "pink", desc: "Meme marketing, industry humor, and lighthearted interactions.", example: "Post: 'When your dog gives you that look because they don't have their premium collar yet [Meme]'" },
+  { id: "community", label: "Community / UGC", icon: Users, color: "orange", desc: "User-generated content, testimonials, client stories, and community building.", example: "Post: 'Look how @Sarah styled our summer jacket! Tag us to be featured.'" },
+  { id: "interactive", label: "Interactive", icon: MessageCircle, color: "cyan", desc: "Polls, Q&A, challenges, and direct questions that spark high engagement.", example: "Post: 'What is your biggest struggle with email marketing? Vote below!'" },
+  { id: "trendjacking", label: "Trend-Jacking", icon: TrendingUp, color: "teal", desc: "Reacting to breaking news, pop culture events, or real-time viral trends.", example: "Post: 'Us watching the new iOS update drop while our app still works perfectly 😎'" },
+  { id: "bts", label: "Behind the Scenes", icon: Camera, color: "indigo", desc: "Showing company culture, how products are made, and day-to-day office life.", example: "Post: 'A day in the life of our lead developer: lots of coffee and code.'" },
 ];
 
 const PLATFORM_TRANSLATIONS: Record<string, { focus: string; formats: Record<string, string> }> = {
@@ -248,8 +254,24 @@ const VERTICALS_TRANSLATIONS: Record<string, { desc: string; example: string }> 
     example: "Post: 'Nuestra nueva colección PetJewels ya está disponible. 15% de descuento hoy.'"
   },
   entertainment: {
-    desc: "Meme marketing, tendencias, humor del nicho e interacciones divertidas.",
-    example: "Post: 'Cuando tu perro te mira con cara de \"¿dónde está mi collar premium?\" [Meme]'"
+    desc: "Meme marketing, humor de la industria e interacciones ligeras.",
+    example: "Post: 'Cuando tu perro te mira porque aún no tiene su collar premium [Meme]'"
+  },
+  community: {
+    desc: "Contenido generado por usuarios, testimonios y construcción de comunidad.",
+    example: "Post: '¡Miren cómo @Sarah luce nuestra chaqueta de verano! Etiqúetanos para aparecer aquí.'"
+  },
+  interactive: {
+    desc: "Encuestas, preguntas, retos y contenido diseñado para generar máxima interacción.",
+    example: "Post: '¿Cuál es tu mayor reto al hacer email marketing? ¡Vota aquí abajo!'"
+  },
+  trendjacking: {
+    desc: "Reaccionar a noticias de última hora, cultura pop o tendencias virales del momento.",
+    example: "Post: 'Nosotros viendo cómo se cae WhatsApp mientras nuestra app sigue funcionando 😎'"
+  },
+  bts: {
+    desc: "Mostrar la cultura de la empresa, cómo se hacen los productos y el día a día.",
+    example: "Post: 'Un día en la vida de nuestro líder técnico: mucho café y código.'"
   }
 };
 

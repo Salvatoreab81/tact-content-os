@@ -85,24 +85,24 @@ export default function DashboardLayout({
   return (
     <div className="flex h-screen overflow-hidden">
       {/* Sidebar */}
-      <aside className="flex w-64 flex-col glass-sidebar shrink-0">
+      <aside className="flex w-64 flex-col glass-sidebar shrink-0 relative z-10 shadow-[4px_0_24px_rgba(0,0,0,0.02)] dark:shadow-[4px_0_24px_rgba(0,0,0,0.4)]">
         {/* Logo */}
         <div className="flex items-center gap-3 px-6 py-6">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#00ff88]/10 border border-[#00ff88]/25 text-[#00ff88] font-bold text-sm shadow-[0_0_24px_rgba(0,255,136,0.12)] transition-all duration-300 hover:shadow-[0_0_32px_rgba(0,255,136,0.2)] hover:scale-105">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--neon)]/10 border border-[var(--neon)]/25 text-[var(--neon)] font-bold text-sm shadow-[0_0_24px_rgba(0,113,227,0.12)] dark:shadow-[0_0_24px_rgba(0,255,136,0.12)] transition-all duration-300 hover:scale-105">
             T
           </div>
           <div>
-            <h1 className="text-sm font-bold text-white tracking-tight heading-brutal">
+            <h1 className="text-sm font-bold text-foreground tracking-tight heading-brutal">
               TACT
             </h1>
-            <p className="text-[10px] text-white/40 font-semibold tracking-[0.15em] uppercase font-mono">
+            <p className="text-[10px] text-[var(--text-muted)] font-semibold tracking-[0.15em] uppercase font-mono">
               Content OS
             </p>
           </div>
         </div>
 
         {/* Divider */}
-        <div className="mx-5 h-px bg-gradient-to-r from-transparent via-white/[0.08] to-transparent" />
+        <div className="mx-5 h-px bg-gradient-to-r from-transparent via-[var(--border)] to-transparent" />
 
         {/* Navigation */}
         <nav className="flex-1 px-4 py-5 space-y-1">
@@ -120,12 +120,12 @@ export default function DashboardLayout({
                 <item.icon
                   className={cn(
                     "h-[18px] w-[18px] shrink-0 transition-colors duration-300",
-                    isActive ? "text-[#00ff88]" : "text-white/25"
+                    isActive ? "text-[var(--neon)]" : "opacity-60"
                   )}
                 />
                 {item.label}
-                {item.href === "/generate" && (
-                  <span className="ml-auto neon-badge">
+                {item.href === "/dashboard/generate" && (
+                  <span className="ml-auto text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider font-mono border bg-[var(--neon)]/10 text-[var(--neon)] border-[var(--neon)]/20 shadow-[0_0_12px_rgba(0,113,227,0.1)] dark:shadow-[0_0_12px_rgba(0,255,136,0.1)]">
                     AI
                   </span>
                 )}
@@ -136,7 +136,7 @@ export default function DashboardLayout({
 
         {/* Bottom */}
         <div className="px-4 py-5 space-y-1">
-          <div className="mx-1 mb-4 h-px bg-gradient-to-r from-transparent via-white/[0.08] to-transparent" />
+          <div className="mx-1 mb-4 h-px bg-gradient-to-r from-transparent via-[var(--border)] to-transparent" />
           {bottomItems.map((item) => {
             const isActive = pathname === item.href;
             return (
@@ -145,28 +145,27 @@ export default function DashboardLayout({
                 href={item.href}
                 className={cn("nav-link", isActive && "active")}
               >
-                <item.icon className="h-[18px] w-[18px]" />
+                <item.icon className="h-[18px] w-[18px] opacity-60" />
                 {item.label}
               </Link>
             );
           })}
           <button
             onClick={handleLogout}
-            className="w-full nav-link text-left text-red-400 hover:text-red-300 hover:bg-red-500/10 cursor-pointer flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-xl transition-all duration-300"
+            className="w-full text-left text-red-500 hover:text-red-600 hover:bg-red-500/10 cursor-pointer flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-xl transition-all duration-300"
           >
             <LogOut className="h-[18px] w-[18px] shrink-0" />
-            Cerrar Sesión
+            Sign Out
           </button>
         </div>
       </aside>
 
       {/* Main content area */}
-      <div className="flex flex-col flex-1 min-w-0">
-        {/* Main content */}
-        <main className="flex-1 overflow-y-auto grid-bg">
+      <div className="flex flex-col flex-1 min-w-0 relative z-0">
+        <main className="flex-1 overflow-y-auto aurora-bg">
           {checkingBrand ? (
             <div className="flex h-full w-full items-center justify-center">
-              <Loader2 className="h-8 w-8 animate-spin text-[#00ff88]" />
+              <Loader2 className="h-8 w-8 animate-spin text-[var(--neon)]" />
             </div>
           ) : (
             children

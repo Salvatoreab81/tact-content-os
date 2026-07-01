@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Settings, Save, CheckCircle, Cpu, Loader2, Key, Globe } from "lucide-react";
+import { Settings, Save, CheckCircle, Cpu, Loader2, Key, Globe, Moon, Sun, Monitor } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useTheme } from "next-themes";
 
 const MODELS = [
   {
@@ -52,8 +53,8 @@ const TRANSLATIONS = {
     openRouterDesc: "Your secure API key for generating AI content and insights.",
     dbStatus: "Firebase Database Status",
     connected: "Connected (Cloud Firestore)",
-    languageLabel: "Language",
-    languageDesc: "Choose your preferred dashboard language.",
+    languageLabel: "Language & Appearance",
+    languageDesc: "Choose your preferred dashboard language and theme.",
   },
   es: {
     title: "Configuración",
@@ -69,13 +70,15 @@ const TRANSLATIONS = {
     openRouterDesc: "Tu llave segura para la generación de contenido e insights.",
     dbStatus: "Estado de la Base de Datos (Firebase)",
     connected: "Conectado (Cloud Firestore)",
-    languageLabel: "Idioma",
-    languageDesc: "Elige tu idioma preferido para el panel de control.",
+    languageLabel: "Idioma y Apariencia",
+    languageDesc: "Elige tu idioma preferido y tema visual.",
   }
 };
 
 export default function SettingsPage() {
   const [lang, setLang] = useState<"en" | "es">("en");
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
   const [selectedModel, setSelectedModel] = useState("google/gemini-2.0-flash-exp:free");
   const [apiKey, setApiKey] = useState("");
   const [brandSlug, setBrandSlug] = useState("");
@@ -84,6 +87,7 @@ export default function SettingsPage() {
   const [saveSuccess, setSaveSuccess] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     // Load language preference
     const savedLang = localStorage.getItem("tact_lang");
     if (savedLang === "es" || savedLang === "en") setLang(savedLang);
@@ -140,10 +144,10 @@ export default function SettingsPage() {
     }
   };
 
-  if (loading) {
+  if (loading || !mounted) {
     return (
       <div className="flex h-[80vh] items-center justify-center">
-        <Loader2 className="h-8 w-8 text-[#00ff88] animate-spin" />
+        <Loader2 className="h-8 w-8 text-[var(--neon)] animate-spin" />
       </div>
     );
   }
@@ -155,23 +159,23 @@ export default function SettingsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-4xl font-extrabold text-white tracking-tight heading-glow flex items-center gap-3">
+          <h1 className="text-4xl font-extrabold tracking-tight heading-glow flex items-center gap-3">
             {t.title}
           </h1>
-          <p className="text-sm text-white/50 mt-3 font-medium">
+          <p className="text-sm text-[var(--text-muted)] mt-3 font-medium">
             {t.desc}
           </p>
         </div>
         <div className="flex items-center gap-3">
           {saveSuccess && (
-            <span className="flex items-center gap-1.5 text-xs text-[#00ff88] font-semibold bg-[#00ff88]/10 border border-[#00ff88]/20 px-3 py-2 rounded-xl animate-fade-in">
+            <span className="flex items-center gap-1.5 text-xs font-semibold bg-[var(--neon)]/10 text-[var(--neon)] border border-[var(--neon)]/20 px-3 py-2 rounded-xl animate-fade-in">
               <CheckCircle className="h-4 w-4" /> {t.saved}
             </span>
           )}
           <Button
             onClick={handleSave}
             disabled={saving}
-            className="bg-[#00ff88] hover:bg-[#00cc6a] text-[#0a0a1a] font-bold transition-all duration-300 glow-sm hover:scale-[1.03] shadow-[0_0_20px_rgba(0,255,136,0.2)]"
+            className="btn-primary"
           >
             {saving ? (
               <>
@@ -189,14 +193,14 @@ export default function SettingsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* AI Model Card */}
         <div className="lg:col-span-2 glass p-6 space-y-6">
-          <h3 className="text-sm font-bold text-white flex items-center gap-2 heading-brutal border-b border-white/[0.06] pb-4">
-            <Cpu className="h-4 w-4 text-[#00ff88]/60" /> {t.aiSettings}
+          <h3 className="text-sm font-bold flex items-center gap-2 heading-brutal border-b border-[var(--border)] pb-4">
+            <Cpu className="h-4 w-4 text-[var(--neon)]/80" /> {t.aiSettings}
           </h3>
           
           <div className="space-y-4">
             <div>
-              <label className="block form-label mb-3">{t.modelLabel}</label>
-              <p className="text-xs text-white/40 mb-4 leading-relaxed">
+              <label className="block form-label">{t.modelLabel}</label>
+              <p className="text-xs text-[var(--text-muted)] mb-4 leading-relaxed">
                 {t.modelDesc}
               </p>
               
@@ -209,28 +213,28 @@ export default function SettingsPage() {
                       onClick={() => setSelectedModel(model.id)}
                       className={`flex items-start justify-between rounded-xl border p-4 text-left transition-all duration-300 ${
                         isSelected
-                          ? "bg-[#00ff88]/10 border-[#00ff88]/25 text-[#00ff88]"
-                          : "bg-white/[0.04] border-white/[0.08] text-white/45 hover:text-white hover:border-white/[0.15]"
+                          ? "bg-[var(--neon)]/10 border-[var(--neon)]/30 text-[var(--neon)] shadow-[0_0_15px_rgba(0,113,227,0.1)] dark:shadow-[0_0_15px_rgba(0,255,136,0.1)]"
+                          : "bg-[var(--hover-bg)] border-[var(--border)] text-[var(--text-muted)] hover:text-foreground hover:border-[var(--foreground)]/20"
                       }`}
                     >
                       <div className="space-y-1 pr-4">
-                        <p className="text-sm font-bold text-white heading-brutal">
+                        <p className="text-sm font-bold heading-brutal">
                           {model.name}
                         </p>
-                        <p className="text-xs text-white/40">
+                        <p className="text-xs opacity-70">
                           {model.desc}
                         </p>
-                        <p className="text-[10px] font-mono text-white/30 pt-1">
+                        <p className="text-[10px] font-mono opacity-50 pt-1">
                           ID: {model.id}
                         </p>
                       </div>
                       <span
                         className={`text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider font-mono border ${
                           model.badge === "Free"
-                            ? "bg-[#00ff88]/10 text-[#00ff88] border-[#00ff88]/20"
+                            ? "bg-[var(--neon)]/10 text-[var(--neon)] border-[var(--neon)]/20"
                             : model.badge === "Preview"
-                              ? "bg-purple-500/10 text-purple-400 border-purple-500/20"
-                              : "bg-cyan-500/10 text-cyan-400 border-cyan-500/20"
+                              ? "bg-purple-500/10 text-purple-500 border-purple-500/20"
+                              : "bg-[var(--neon-secondary)]/10 text-[var(--neon-secondary)] border-[var(--neon-secondary)]/20"
                         }`}
                       >
                         {model.badge}
@@ -245,39 +249,71 @@ export default function SettingsPage() {
 
         {/* Right Sidebar Configs */}
         <div className="space-y-6">
-          <div className="glass p-6 space-y-4">
-            <h3 className="text-sm font-bold text-white flex items-center gap-2 heading-brutal border-b border-white/[0.06] pb-4">
-              <Globe className="h-4 w-4 text-blue-400" /> {t.languageLabel}
+          <div className="glass p-6 space-y-5">
+            <h3 className="text-sm font-bold flex items-center gap-2 heading-brutal border-b border-[var(--border)] pb-4">
+              <Globe className="h-4 w-4 text-[var(--neon)]" /> {t.languageLabel}
             </h3>
-            <p className="text-xs text-white/40">{t.languageDesc}</p>
-            <div className="flex items-center gap-3">
+            <p className="text-xs text-[var(--text-muted)]">{t.languageDesc}</p>
+            
+            <div className="flex items-center bg-[var(--input)] p-1 rounded-xl border border-[var(--border)]">
               <button
                 onClick={() => handleLanguageChange("en")}
-                className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all ${
-                  lang === "en" ? "bg-blue-500/20 text-blue-400 border border-blue-500/30" : "bg-white/[0.03] text-white/40 border border-white/[0.05]"
+                className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  lang === "en" ? "bg-background text-foreground shadow-sm" : "text-[var(--text-muted)] hover:text-foreground"
                 }`}
               >
-                English
+                EN
               </button>
               <button
                 onClick={() => handleLanguageChange("es")}
-                className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all ${
-                  lang === "es" ? "bg-blue-500/20 text-blue-400 border border-blue-500/30" : "bg-white/[0.03] text-white/40 border border-white/[0.05]"
+                className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  lang === "es" ? "bg-background text-foreground shadow-sm" : "text-[var(--text-muted)] hover:text-foreground"
                 }`}
               >
-                Español
+                ES
               </button>
             </div>
+
+            <div className="flex items-center bg-[var(--input)] p-1 rounded-xl border border-[var(--border)]">
+              <button
+                onClick={() => setTheme("light")}
+                className={`flex-1 py-1.5 flex justify-center rounded-lg transition-all ${
+                  theme === "light" ? "bg-background text-foreground shadow-sm" : "text-[var(--text-muted)] hover:text-foreground"
+                }`}
+                title="Light Mode"
+              >
+                <Sun className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => setTheme("dark")}
+                className={`flex-1 py-1.5 flex justify-center rounded-lg transition-all ${
+                  theme === "dark" ? "bg-background text-foreground shadow-sm" : "text-[var(--text-muted)] hover:text-foreground"
+                }`}
+                title="Dark Mode"
+              >
+                <Moon className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => setTheme("system")}
+                className={`flex-1 py-1.5 flex justify-center rounded-lg transition-all ${
+                  theme === "system" ? "bg-background text-foreground shadow-sm" : "text-[var(--text-muted)] hover:text-foreground"
+                }`}
+                title="System Theme"
+              >
+                <Monitor className="h-4 w-4" />
+              </button>
+            </div>
+
           </div>
 
           <div className="glass p-6 space-y-4">
-            <h3 className="text-sm font-bold text-white flex items-center gap-2 heading-brutal border-b border-white/[0.06] pb-4">
-              <Key className="h-4 w-4 text-purple-400" /> {t.apiKeyLabel}
+            <h3 className="text-sm font-bold flex items-center gap-2 heading-brutal border-b border-[var(--border)] pb-4">
+              <Key className="h-4 w-4 text-purple-500" /> {t.apiKeyLabel}
             </h3>
             
             <div className="space-y-4 pt-1">
               <div>
-                <label className="block text-xs font-semibold text-white/50 uppercase tracking-wider font-mono mb-2">
+                <label className="form-label">
                   {t.openRouterKey}
                 </label>
                 <input
@@ -285,18 +321,18 @@ export default function SettingsPage() {
                   value={apiKey}
                   onChange={(e) => setApiKey(e.target.value)}
                   placeholder="sk-or-v1-..."
-                  className="w-full bg-black/40 border border-white/[0.1] rounded-xl p-3 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/50 transition-all font-mono"
+                  className="glass-input font-mono text-sm"
                 />
-                <p className="text-[10px] text-white/40 mt-2">{t.openRouterDesc}</p>
+                <p className="text-[10px] text-[var(--text-muted)] mt-2">{t.openRouterDesc}</p>
               </div>
 
-              <div className="h-px bg-white/[0.06] my-4" />
+              <div className="h-px bg-[var(--border)] my-4" />
 
               <div>
-                <p className="text-xs font-semibold text-white/50 uppercase tracking-wider font-mono">{t.dbStatus}</p>
+                <p className="form-label">{t.dbStatus}</p>
                 <div className="flex items-center gap-2 mt-1.5">
-                  <span className="h-2 w-2 rounded-full bg-[#00ff88] animate-pulse" />
-                  <span className="text-xs text-white/70 font-semibold font-mono">{t.connected}</span>
+                  <span className="h-2 w-2 rounded-full bg-[var(--neon-secondary)] animate-pulse" />
+                  <span className="text-xs text-[var(--text-muted)] font-semibold font-mono">{t.connected}</span>
                 </div>
               </div>
             </div>
