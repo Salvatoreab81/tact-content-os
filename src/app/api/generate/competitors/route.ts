@@ -3,11 +3,11 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name, industry, competitorNotes, targetAudience, model, apiKey: userApiKey } = body;
+    const { name, industry, competitors, targetAudience, model, apiKey: userApiKey, lang = "en" } = body;
 
-    if (!name || !industry || !competitorNotes) {
+    if (!name || !industry || !competitors || !Array.isArray(competitors)) {
       return NextResponse.json(
-        { error: "Missing required fields: name, industry, competitorNotes" },
+        { error: "Missing required fields: name, industry, competitors (array)" },
         { status: 400 }
       );
     }
@@ -26,24 +26,45 @@ export async function POST(request: NextRequest) {
     }
     const selectedModel = model || defaultModel;
 
-    const systemPrompt = `You are a top-tier Brand Strategist and Competitor Analyst. Your job is to analyze rough notes about competitors and extract actionable, high-value insights.`;
+    const systemPrompt = `You are an elite Market Research Strategist and Chief Marketing Officer. Your job is to analyze competitor data to extract high-value insights focused on maximizing ROI (Return on Investment) and ROT (Return on Time), as well as audience building and engagement.`;
 
     const marketsStr = targetAudience?.markets?.length ? targetAudience.markets.join(", ") : "Global";
 
-    const userPrompt = `Please analyze the following raw competitor research notes for our brand:
+    let competitorsText = "";
+    competitors.forEach((c: any, index: number) => {
+      competitorsText += `\nCompetitor ${index + 1}: ${c.name} (${c.url})\n`;
+      if (c.prices) competitorsText += `- Pricing Strategy: ${c.prices}\n`;
+      if (c.promotions) competitorsText += `- Current Promotions: ${c.promotions}\n`;
+      if (c.topPerforming) competitorsText += `- Top Performing Content / What works: ${c.topPerforming}\n`;
+      if (c.failedContent) competitorsText += `- Failed Content / What doesn't work: ${c.failedContent}\n`;
+      if (c.trends) competitorsText += `- Observed Trends: ${c.trends}\n`;
+      if (c.notes) competitorsText += `- Additional Notes: ${c.notes}\n`;
+    });
+
+    const isSpanish = lang === "es";
+
+    const userPrompt = `Please analyze the following competitor data for our brand:
 - Our Brand: ${name}
 - Industry: ${industry}
 - Markets: ${marketsStr}
 
-Raw Competitor Notes:
-"${competitorNotes}"
+Competitors Data:
+${competitorsText}
 
-Based on these notes, generate a structured strategic summary in Spanish. Provide:
-1. "Fortalezas de la Competencia" (Competitor Strengths - 2 bullet points)
-2. "Oportunidades para ${name}" (Opportunities/Gaps - 2 bullet points)
-3. "Ángulo de Contenido Recomendado" (1 recommended content angle we should use to stand out)
+Based on this data, generate a structured strategic summary. Focus intensely on actionable takeaways to increase our ROI and ROT. Identify market gaps, pricing opportunities, and content that actually converts vs vanity metrics.
 
-Format it cleanly with Markdown headers and bullet points. Do not include any introductory text. Write entirely in Spanish.`;
+Provide the analysis in the following format (use Markdown):
+
+### 1. Market & Pricing Dynamics
+(Analyze their pricing, promos, and how we can position ourselves for better conversions)
+
+### 2. Content & Engagement Analysis
+(What content works for them that we should adopt? What failed for them that we should avoid?)
+
+### 3. ROI & ROT Strategic Recommendations
+(Provide 3 highly actionable steps we must take right now to capture their audience and maximize ROI/ROT)
+
+Write the entire response in ${isSpanish ? "Spanish" : "English"}. Do not include any generic introductory text.`;
 
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
@@ -59,7 +80,7 @@ Format it cleanly with Markdown headers and bullet points. Do not include any in
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt }
         ],
-        temperature: 0.7,
+        temperature: 0.6,
       }),
     });
 

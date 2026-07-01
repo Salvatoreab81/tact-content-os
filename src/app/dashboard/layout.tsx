@@ -12,6 +12,7 @@ import {
   Building2,
   Loader2,
   LogOut,
+  Radar,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -20,6 +21,7 @@ const navItems = [
   { href: "/dashboard/calendar", label: "Calendar", icon: Calendar },
   { href: "/dashboard/content", label: "Content", icon: FileText },
   { href: "/dashboard/brand", label: "Brand", icon: Building2 },
+  { href: "/dashboard/competitors", label: "Competitors", icon: Radar },
   { href: "/dashboard/generate", label: "Generate", icon: Sparkles },
 ];
 

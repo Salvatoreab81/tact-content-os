@@ -48,7 +48,6 @@ const STEPS = [
   { title: "Content Verticals", icon: Hash },
   { title: "Tone of Voice", icon: MessageSquare },
   { title: "Review & Audit", icon: Send },
-  { title: "Competitor Research", icon: Lightbulb },
 ];
 
 const PLATFORMS = [
@@ -311,12 +310,6 @@ const TRANSLATIONS = {
     auditing: "Auditing...",
     applyChecked: "Apply Checked Audit Adjustments",
     pressAudit: "Press \"Audit Configuration\" to review for audience-channel inconsistencies, target splits, and tone guidelines.",
-    // Step 7: Competitor Research
-    competitorResearchTitle: "Competitor Research",
-    competitorResearchDesc: "Add raw notes about your competitors and let TACT extract insights and angles.",
-    competitorNotesPlaceholder: "Paste competitor URLs, their content strategies, what they do well, what they miss...",
-    analyzeCompetitorsBtn: "AI Analyze Competitors",
-    analyzingCompetitors: "Analyzing...",
     // Navigation
     back: "Back",
     continue: "Continue",
@@ -380,12 +373,6 @@ const TRANSLATIONS = {
     auditing: "Auditando...",
     applyChecked: "Aplicar Ajustes Auditados Seleccionados",
     pressAudit: "Presiona \"Auditar Configuración\" para analizar inconsistencias entre audiencias y canales, splits y tono.",
-    // Step 7: Competitor Research
-    competitorResearchTitle: "Investigación de Competencia",
-    competitorResearchDesc: "Agrega notas sobre tus competidores y deja que TACT extraiga insights y ángulos.",
-    competitorNotesPlaceholder: "Pega URLs de competidores, sus estrategias, qué hacen bien, qué les falta...",
-    analyzeCompetitorsBtn: "Analizar Competencia (IA)",
-    analyzingCompetitors: "Analizando...",
     // Navigation
     back: "Atrás",
     continue: "Continuar",
@@ -410,7 +397,7 @@ export default function OnboardingPage() {
   const [appliedRecommendations, setAppliedRecommendations] = useState<string[]>([]);
   const [excludedCountryInput, setExcludedCountryInput] = useState("");
   const [auditError, setAuditError] = useState("");
-  const [analyzingCompetitors, setAnalyzingCompetitors] = useState(false);
+
   const [lang, setLang] = useState<"en" | "es">("en");
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null);
 
@@ -778,40 +765,6 @@ export default function OnboardingPage() {
     setAuditRecommendations((prev) => prev.filter(r => r.id !== rec.id));
   };
 
-  const handleAnalyzeCompetitors = async () => {
-    if (!form.competitorResearch.trim()) return;
-    setAnalyzingCompetitors(true);
-    try {
-      const res = await fetch("/api/generate/competitors", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: form.name,
-          industry: form.industry,
-          competitorNotes: form.competitorResearch,
-          targetAudience: form.targetAudience,
-          apiKey: form.openrouterApiKey,
-          model: form.openrouterModel,
-        }),
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        if (data.insights) {
-          updateForm({ competitorResearch: form.competitorResearch + "\n\n--- AI Insights ---\n" + data.insights });
-          showToast(lang === "en" ? "Insights added successfully!" : "¡Insights agregados con éxito!", "success");
-        }
-      } else {
-        showToast(lang === "en" ? "Failed to analyze competitors." : "Fallo al analizar la competencia.", "error");
-      }
-    } catch (err) {
-      console.error("Error analyzing competitors:", err);
-      showToast(lang === "en" ? "Network error analyzing competitors." : "Error de red al analizar.", "error");
-    } finally {
-      setAnalyzingCompetitors(false);
-    }
-  };
-
   const canProceed = () => {
     switch (step) {
       case 0: // API & Model Setup: always allowed since key is optional and model has default
@@ -827,8 +780,6 @@ export default function OnboardingPage() {
       case 5: // Tone of Voice
         return form.toneOfVoice.trim().length > 0;
       case 6: // Review & Audit
-        return true;
-      case 7: // Competitor Research
         return true;
       default:
         return true;
@@ -903,8 +854,7 @@ export default function OnboardingPage() {
       lang === "en" ? "Platforms & Formats" : "Plataformas y Formatos",
       lang === "en" ? "Content Verticals" : "Verticales de Contenido",
       lang === "en" ? "Tone of Voice" : "Tono de Voz",
-      lang === "en" ? "Review & Audit" : "Revisión y Auditoría",
-      lang === "en" ? "Competitor Research" : "Investigación de Competencia"
+      lang === "en" ? "Review & Audit" : "Revisión y Auditoría"
     ];
     return { ...s, title: titles[i] };
   });
@@ -1796,52 +1746,6 @@ export default function OnboardingPage() {
                 <ReviewSection title={lang === "en" ? "Tone of Voice Guidelines" : "Pautas de Tono de Voz"}>
                   <p className="text-[11px] text-white/60 leading-relaxed italic">{form.toneOfVoice || "—"}</p>
                 </ReviewSection>
-              </div>
-            </div>
-          )}
-
-          {step === 7 && (
-            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <div className="space-y-2">
-                <h2 className="text-xl font-bold font-mono uppercase tracking-tight flex items-center gap-2">
-                  <Lightbulb className="h-5 w-5 text-[#00ff88]" />
-                  {t("competitorResearchTitle")}
-                </h2>
-                <p className="text-[11px] text-white/50 leading-relaxed max-w-xl font-mono">
-                  {t("competitorResearchDesc")}
-                </p>
-              </div>
-
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <textarea
-                    value={form.competitorResearch}
-                    onChange={(e) => updateForm({ competitorResearch: e.target.value })}
-                    placeholder={t("competitorNotesPlaceholder")}
-                    className="w-full h-48 bg-white/[0.03] border border-white/[0.1] rounded-xl p-4 text-[13px] text-white placeholder:text-white/20 focus:outline-none focus:border-[#00ff88]/50 focus:ring-1 focus:ring-[#00ff88]/50 transition-all font-mono resize-y"
-                  />
-                </div>
-
-                <div className="flex justify-end">
-                  <Button
-                    type="button"
-                    onClick={handleAnalyzeCompetitors}
-                    disabled={analyzingCompetitors || !form.competitorResearch.trim()}
-                    className="bg-[#00ff88]/10 hover:bg-[#00ff88]/20 text-[#00ff88] border border-[#00ff88]/20 font-mono text-xs rounded-xl"
-                  >
-                    {analyzingCompetitors ? (
-                      <>
-                        <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-t-transparent border-[#00ff88] mr-2" />
-                        {t("analyzingCompetitors")}
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles className="h-3.5 w-3.5 mr-2" />
-                        {t("analyzeCompetitorsBtn")}
-                      </>
-                    )}
-                  </Button>
-                </div>
               </div>
             </div>
           )}
