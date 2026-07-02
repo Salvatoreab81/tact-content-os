@@ -91,8 +91,8 @@ export default function DashboardLayout({
         <div className="flex items-center gap-3 px-6 py-6">
           <Logo size="md" />
           <div>
-            <h1 className="text-sm font-bold text-foreground tracking-tight heading-brutal">
-              TACT
+            <h1 className="text-sm font-bold text-foreground tracking-tight heading-brutal flex items-center gap-1.5">
+              TACT <span className="text-[9px] font-normal px-1 py-0.5 rounded bg-white/5 border border-white/10 text-white/40 font-mono">v0.1.0-alpha</span>
             </h1>
             <p className="text-[10px] text-[var(--text-muted)] font-semibold tracking-[0.15em] uppercase font-mono">
               Content OS
