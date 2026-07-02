@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Radar, Plus, Trash2, Sparkles, Loader2, Save, TrendingUp, DollarSign, ArrowUpRight, AlertOctagon, Search } from "lucide-react";
+import { Radar, Plus, Trash2, Sparkles, Loader2, Save, TrendingUp, DollarSign, ArrowUpRight, AlertOctagon, Search, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface Competitor {
@@ -69,6 +69,78 @@ const TRANSLATIONS = {
     },
     remove: "Eliminar"
   }
+};
+
+const parseInsights = (text: string) => {
+  if (!text) return null;
+  const parts = text.split(/### \d+\.\s*/);
+  if (parts.length >= 4) {
+    return {
+      market: parts[1]?.trim() || "",
+      content: parts[2]?.trim() || "",
+      recommendations: parts[3]?.trim() || ""
+    };
+  }
+  const partsAlt = text.split(/###\s+\d+\s+/);
+  if (partsAlt.length >= 4) {
+    return {
+      market: partsAlt[1]?.trim() || "",
+      content: partsAlt[2]?.trim() || "",
+      recommendations: partsAlt[3]?.trim() || ""
+    };
+  }
+  return {
+    market: "",
+    content: "",
+    recommendations: text
+  };
+};
+
+const stripHeaderTitle = (text: string) => {
+  const lines = text.split('\n');
+  if (lines.length > 1) {
+    if (lines[0].length < 60) {
+      return lines.slice(1).join('\n').trim();
+    }
+  }
+  return text;
+};
+
+const renderMarkdown = (text: string) => {
+  if (!text) return "";
+  let html = text;
+  html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+  
+  const lines = html.split('\n');
+  let inList = false;
+  const processedLines = lines.map(line => {
+    const trimmed = line.trim();
+    if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
+      const content = trimmed.substring(2);
+      let res = `<li class="ml-4 list-disc pl-1 text-white/80 my-1">${content}</li>`;
+      if (!inList) {
+        res = `<ul class="space-y-1 my-2">${res}`;
+        inList = true;
+      }
+      return res;
+    } else {
+      let res = "";
+      if (inList) {
+        res = '</ul>';
+        inList = false;
+      }
+      if (trimmed) {
+        res += `<p class="leading-relaxed mb-2">${trimmed}</p>`;
+      }
+      return res;
+    }
+  });
+  
+  if (inList) {
+    processedLines.push('</ul>');
+  }
+  return processedLines.join('');
 };
 
 export default function CompetitorsPage() {
@@ -426,29 +498,65 @@ export default function CompetitorsPage() {
               <h2 className="text-lg font-bold heading-brutal">{t.insightsTitle}</h2>
             </div>
             
-            <div className="glass p-6 rounded-2xl min-h-[400px] border-[var(--neon)]/20 bg-[var(--neon)]/5">
-              {insights ? (
-                <div 
-                  className="prose prose-sm max-w-none dark:prose-invert prose-headings:text-[var(--neon)] prose-headings:font-bold prose-headings:font-mono prose-headings:uppercase prose-a:text-[var(--neon)] prose-strong:text-foreground"
-                  dangerouslySetInnerHTML={{
-                    __html: insights
-                      .replace(/^### (.*$)/gim, '<h3>$1</h3>')
-                      .replace(/^## (.*$)/gim, '<h2>$1</h2>')
-                      .replace(/^# (.*$)/gim, '<h1>$1</h1>')
-                      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                      .replace(/\*(.*?)\*/g, '<em>$1</em>')
-                      .replace(/\n\n/g, '</p><p>')
-                      .replace(/\n- (.*)/g, '<li>$1</li>')
-                  }}
-                />
-              ) : (
-                <div className="h-full flex flex-col items-center justify-center text-center opacity-40 py-12">
-                  <ArrowUpRight className="h-10 w-10 mb-4" />
-                  <p className="text-sm font-medium">{t.insightsDesc}</p>
-                  <p className="text-[10px] mt-2 font-mono uppercase tracking-wider text-[var(--text-muted)]">Awaiting Analysis</p>
-                </div>
-              )}
-            </div>
+            {insights ? (
+              <div className="space-y-4">
+                {(() => {
+                  const parsed = parseInsights(insights);
+                  if (!parsed) return null;
+                  return (
+                    <>
+                      {/* Section 1: Market & Pricing */}
+                      {parsed.market && (
+                        <div className="glass p-5 rounded-2xl border border-emerald-500/20 bg-emerald-500/[0.02] space-y-3">
+                          <div className="flex items-center gap-2 text-emerald-400 font-mono text-xs font-bold uppercase tracking-wider">
+                            <DollarSign className="h-4 w-4" />
+                            {lang === "en" ? "Market & Pricing Dynamics" : "Dinámica de Mercado y Precios"}
+                          </div>
+                          <div 
+                            className="text-xs text-white/70 space-y-2"
+                            dangerouslySetInnerHTML={{ __html: renderMarkdown(stripHeaderTitle(parsed.market)) }}
+                          />
+                        </div>
+                      )}
+
+                      {/* Section 2: Content & Engagement */}
+                      {parsed.content && (
+                        <div className="glass p-5 rounded-2xl border border-purple-500/20 bg-purple-500/[0.02] space-y-3">
+                          <div className="flex items-center gap-2 text-purple-400 font-mono text-xs font-bold uppercase tracking-wider">
+                            <Radar className="h-4 w-4" />
+                            {lang === "en" ? "Content & Engagement" : "Contenido y Engagement"}
+                          </div>
+                          <div 
+                            className="text-xs text-white/70 space-y-2"
+                            dangerouslySetInnerHTML={{ __html: renderMarkdown(stripHeaderTitle(parsed.content)) }}
+                          />
+                        </div>
+                      )}
+
+                      {/* Section 3: Strategic Recommendations */}
+                      {parsed.recommendations && (
+                        <div className="glass p-5 rounded-2xl border border-[#00ff88]/20 bg-[#00ff88]/[0.02] space-y-3 shadow-[0_0_30px_rgba(0,255,136,0.02)]">
+                          <div className="flex items-center gap-2 text-[#00ff88] font-mono text-xs font-bold uppercase tracking-wider">
+                            <Sparkles className="h-4 w-4 animate-pulse" />
+                            {lang === "en" ? "ROI & ROT Recommendations" : "Recomendaciones de ROI y ROT"}
+                          </div>
+                          <div 
+                            className="text-xs text-white/70 space-y-2"
+                            dangerouslySetInnerHTML={{ __html: renderMarkdown(stripHeaderTitle(parsed.recommendations)) }}
+                          />
+                        </div>
+                      )}
+                    </>
+                  );
+                })()}
+              </div>
+            ) : (
+              <div className="glass p-6 rounded-2xl min-h-[400px] border-[var(--neon)]/20 bg-[var(--neon)]/5 flex flex-col items-center justify-center text-center opacity-40">
+                <ArrowUpRight className="h-10 w-10 mb-4" />
+                <p className="text-sm font-medium">{t.insightsDesc}</p>
+                <p className="text-[10px] mt-2 font-mono uppercase tracking-wider text-[var(--text-muted)]">Awaiting Analysis</p>
+              </div>
+            )}
           </div>
         </div>
 
