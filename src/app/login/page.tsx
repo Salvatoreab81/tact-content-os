@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { ShieldAlert, LogIn, Lock, Mail, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Logo } from "@/components/Logo";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -138,9 +139,7 @@ export default function LoginPage() {
       <div className="w-full max-w-md glass border border-white/[0.08] p-8 space-y-6 z-10 shadow-[0_0_50px_rgba(0,0,0,0.3)]">
         {/* Header */}
         <div className="text-center space-y-2">
-          <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-[#00ff88]/10 border border-[#00ff88]/25 text-[#00ff88] font-bold text-lg mb-2 shadow-[0_0_24px_rgba(0,255,136,0.12)]">
-            T
-          </div>
+          <Logo size="lg" className="mx-auto mb-2" />
           <h2 className="text-xl font-bold text-white tracking-tight heading-brutal">
             TACT CONTENT OS
           </h2>

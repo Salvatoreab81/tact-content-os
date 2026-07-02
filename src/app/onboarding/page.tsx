@@ -35,6 +35,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Logo } from "@/components/Logo";
 
 const XIcon = (props: any) => (
   <svg viewBox="0 0 24 24" fill="currentColor" className={props.className}>
@@ -951,9 +952,7 @@ export default function OnboardingPage() {
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#00ff88]/10 border border-[#00ff88]/25 text-[#00ff88] font-bold text-sm shadow-[0_0_24px_rgba(0,255,136,0.12)]">
-              T
-            </div>
+            <Logo size="md" />
             <span className="text-lg font-bold text-white heading-brutal">TACT</span>
           </div>
           <h1 className="text-3xl font-extrabold text-white mb-2 heading-glow">

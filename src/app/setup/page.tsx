@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import { Sparkles, Globe, Key, Cpu, ArrowRight, Check, Monitor, Sun, Moon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Logo } from "@/components/Logo";
 
 const MODELS = [
   { id: "google/gemini-2.0-flash-exp:free", name: "Gemini 2.0 Flash (Free)" },
@@ -48,9 +49,7 @@ export default function SetupWizard() {
       
       {/* Dynamic Header */}
       <div className="mb-12 text-center animate-in fade-in slide-in-from-bottom-4 duration-700">
-        <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--neon)]/10 border border-[var(--neon)]/20 text-[var(--neon)] font-bold text-2xl shadow-[0_0_40px_rgba(0,113,227,0.2)] dark:shadow-[0_0_40px_rgba(0,255,136,0.2)] mb-6">
-          <Sparkles className="h-8 w-8" />
-        </div>
+        <Logo size="xl" className="mx-auto mb-6" />
         <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight heading-glow mb-3">
           {lang === "en" ? "System Setup" : "Configuración del Sistema"}
         </h1>

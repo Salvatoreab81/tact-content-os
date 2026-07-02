@@ -15,6 +15,7 @@ import {
   Radar,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Logo } from "@/components/Logo";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -88,9 +89,7 @@ export default function DashboardLayout({
       <aside className="flex w-64 flex-col glass-sidebar shrink-0 relative z-10 shadow-[4px_0_24px_rgba(0,0,0,0.02)] dark:shadow-[4px_0_24px_rgba(0,0,0,0.4)]">
         {/* Logo */}
         <div className="flex items-center gap-3 px-6 py-6">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--neon)]/10 border border-[var(--neon)]/25 text-[var(--neon)] font-bold text-sm shadow-[0_0_24px_rgba(0,113,227,0.12)] dark:shadow-[0_0_24px_rgba(0,255,136,0.12)] transition-all duration-300 hover:scale-105">
-            T
-          </div>
+          <Logo size="md" />
           <div>
             <h1 className="text-sm font-bold text-foreground tracking-tight heading-brutal">
               TACT
