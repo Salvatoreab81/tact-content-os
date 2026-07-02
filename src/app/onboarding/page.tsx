@@ -1022,38 +1022,7 @@ export default function OnboardingPage() {
         {/* Step content */}
         <div className="glass glass-accent-top p-7 sm:p-9">
           
-          {/* Step 0: API & Model Setup */}
-          }
-                    className="glass-input h-10 text-xs font-mono"
-                  />
-                  <p className="text-[10px] text-white/30 mt-1 leading-normal">
-                    {t("openrouterApiKeyDesc")}
-                  </p>
-                </div>
 
-                <div>
-                  <label className="block form-label mb-1.5">{t("selectModel")}</label>
-                  <select
-                    value={form.openrouterModel}
-                    onChange={(e) => updateForm({ openrouterModel: e.target.value })}
-                    className="glass-input w-full h-10 px-3 text-xs bg-black/40 border border-white/[0.08] text-white/80 rounded-xl focus:border-[#00ff88]/50 focus:outline-none transition-all duration-300"
-                  >
-                    <option value="google/gemini-2.0-flash" className="bg-neutral-900 text-white">Google Gemini 2.0 Flash (Recommended)</option>
-                    <option value="google/gemini-2.5-flash" className="bg-neutral-900 text-white">Google Gemini 2.5 Flash</option>
-                    <option value="meta-llama/llama-3.3-70b-instruct" className="bg-neutral-900 text-white">Llama 3.3 70B Instruct</option>
-                    <option value="anthropic/claude-3.5-sonnet" className="bg-neutral-900 text-white">Claude 3.5 Sonnet</option>
-                    <option value="openai/gpt-4o-mini" className="bg-neutral-900 text-white">GPT-4o Mini</option>
-                  </select>
-                  <p className="text-[10px] text-white/30 mt-1 leading-normal">
-                    {t("selectModelDesc")}
-                  </p>
-                  <p className="text-[10px] text-[#00ff88]/60 mt-1 font-mono">
-                    {t("modelRecommended")}
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
 
           {/* Step 1: Brand Basics */}
           {step === 0 && (
