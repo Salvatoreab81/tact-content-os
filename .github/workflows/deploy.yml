@@ -1,3 +1,4 @@
+# Trigger deploy workflow with reusable key
 name: Deploy to Coolify via Tailscale
 
 on:
