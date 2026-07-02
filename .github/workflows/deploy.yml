@@ -1,0 +1,20 @@
+name: Deploy to Coolify via Tailscale
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Connect to Tailscale
+        uses: tailscale/github-action@v2
+        with:
+          authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
+
+      - name: Trigger Coolify Webhook via Tailnet
+        run: |
+          echo "Connecting to Coolify on Tailscale IP..."
+          curl -i -X POST "http://100.112.31.122:8000/api/v1/deploy?uuid=wtp1pfye6mcpa12xzddl6fuu&force=false"
