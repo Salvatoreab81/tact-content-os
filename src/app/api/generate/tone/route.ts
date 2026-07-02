@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { brandName, industry, targetAudience, presets, model, apiKey: userApiKey } = body;
+    const { brandName, industry, targetAudience, presets, model, apiKey: userApiKey, customPrompt } = body;
 
     if (!brandName || !industry) {
       return NextResponse.json(
@@ -37,6 +37,11 @@ export async function POST(request: NextRequest) {
       ? `A/B (Luxury): ${targetAudience.socioEconomic.ab || 0}%, C+ (Premium): ${targetAudience.socioEconomic.cplus || 0}%, C (Mass): ${targetAudience.socioEconomic.c || 0}%, D/E (Low Cost): ${targetAudience.socioEconomic.de || 0}%`
       : "All levels";
     const presetsStr = presets?.length ? presets.join(", ") : "Professional, friendly";
+    
+    let promptAddition = "";
+    if (customPrompt) {
+      promptAddition = `\n- Additional User Instructions for Tone adjustments: "${customPrompt}"`;
+    }
 
     const userPrompt = `Please write a professional, strategic, and high-impact tone of voice guideline in Spanish for the following brand:
 - Brand Name: ${brandName}
@@ -45,7 +50,7 @@ export async function POST(request: NextRequest) {
 - Target Demographics (Gender): ${gendersStr}
 - Target Demographics (Generations): ${generationsStr}
 - Target Socio-Economic Profile: ${socioEconomicStr}
-- Preferred Tone Descriptors: ${presetsStr}
+- Preferred Tone Descriptors: ${presetsStr}${promptAddition}
 
 Structure your response exactly as follows (use these exact headings):
 Voz: [A strategic description of the brand's personality and character in 2-3 sentences]

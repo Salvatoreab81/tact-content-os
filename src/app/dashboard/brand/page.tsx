@@ -249,6 +249,9 @@ export default function BrandGuidelinesPage() {
   const [loadingHistory, setLoadingHistory] = useState(true);
   const [selectedHistoryVer, setSelectedHistoryVer] = useState<any>(null);
 
+  const [generatingTone, setGeneratingTone] = useState(false);
+  const [toneCustomPrompt, setToneCustomPrompt] = useState("");
+
   const [form, setForm] = useState({
     openrouterApiKey: "",
     openrouterModel: "google/gemini-2.0-flash",
@@ -435,6 +438,39 @@ export default function BrandGuidelinesPage() {
       showToast(lang === "en" ? `Save failed: ${err.message}` : `Error de red al guardar: ${err.message}`, "error");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleGenerateTone = async () => {
+    if (!form.name || !form.industry) {
+      showToast(lang === "en" ? "Brand Name and Industry are required" : "Nombre e industria requeridos", "error");
+      return;
+    }
+    setGeneratingTone(true);
+    try {
+      const res = await fetch("/api/generate/tone", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          brandName: form.name,
+          industry: form.industry,
+          targetAudience: form.targetAudience,
+          model: form.openrouterModel,
+          customPrompt: toneCustomPrompt
+        })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setForm(prev => ({ ...prev, toneOfVoice: data.toneOfVoice }));
+        showToast(lang === "en" ? "Tone of voice generated successfully!" : "¡Tono de voz generado!", "success");
+      } else {
+        const err = await res.json();
+        showToast(err.error || "Failed to generate tone", "error");
+      }
+    } catch (e) {
+      showToast("Error connecting to AI.", "error");
+    } finally {
+      setGeneratingTone(false);
     }
   };
 
@@ -663,13 +699,39 @@ export default function BrandGuidelinesPage() {
 
           {/* Tone of Voice Card */}
           <div className="glass p-6 space-y-4">
-            <h3 className="text-sm font-bold text-white flex items-center gap-2 heading-brutal border-b border-white/[0.06] pb-4">
-              <MessageSquare className="h-4 w-4 text-[#00ff88]/60" /> {lang === "en" ? "Tone of Voice" : "Tono de Voz"}
-            </h3>
+            <div className="flex items-center justify-between border-b border-white/[0.06] pb-4">
+              <h3 className="text-sm font-bold text-white flex items-center gap-2 heading-brutal">
+                <MessageSquare className="h-4 w-4 text-[#00ff88]/60" /> {lang === "en" ? "Tone of Voice" : "Tono de Voz"}
+              </h3>
+            </div>
+            
+            <div className="space-y-3 bg-black/20 p-4 rounded-xl border border-[#00ff88]/10">
+              <div className="flex flex-col sm:flex-row items-center gap-3">
+                <Input
+                  placeholder={lang === "en" ? "Custom AI instructions (e.g. 'Make it funnier', 'More professional')" : "Instrucciones IA (ej. 'Hazlo más divertido', 'Más corporativo')"}
+                  value={toneCustomPrompt}
+                  onChange={(e) => setToneCustomPrompt(e.target.value)}
+                  className="glass-input text-xs flex-1"
+                />
+                <Button 
+                  onClick={handleGenerateTone} 
+                  disabled={generatingTone || !form.name || !form.industry}
+                  variant="outline"
+                  className="w-full sm:w-auto text-xs bg-[#00ff88]/10 border-[#00ff88]/20 text-[#00ff88] hover:bg-[#00ff88]/20 hover:text-[#00ff88]"
+                >
+                  {generatingTone ? <Loader2 className="h-3 w-3 mr-2 animate-spin" /> : <Sparkles className="h-3 w-3 mr-2" />}
+                  {lang === "en" ? "Generate with AI" : "Generar con IA"}
+                </Button>
+              </div>
+              <p className="text-[10px] text-white/40">
+                {lang === "en" ? "Fills out the tone guidelines based on your brand name, industry, and audience. Add custom instructions to steer the AI." : "Rellena las pautas de tono basándose en tu marca, industria y audiencia. Añade instrucciones para guiar a la IA."}
+              </p>
+            </div>
+
             <div>
               <label className="block form-label mb-2">{lang === "en" ? "Voice & Persona Guidelines" : "Pautas de Voz y Personalidad"}</label>
               <textarea
-                rows={5}
+                rows={10}
                 value={form.toneOfVoice}
                 onChange={(e) => setForm({ ...form, toneOfVoice: e.target.value })}
                 placeholder={lang === "en" ? "Describe your brand's voice and guidelines..." : "Describe la voz y pautas de tu marca..."}
