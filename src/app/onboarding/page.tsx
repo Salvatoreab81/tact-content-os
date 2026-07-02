@@ -43,7 +43,6 @@ const XIcon = (props: any) => (
 );
 
 const STEPS = [
-  { title: "API & Model Setup", icon: Key },
   { title: "Brand Basics", icon: Building2 },
   { title: "Target Audience", icon: Globe },
   { title: "Platforms & Formats", icon: Layers },
@@ -424,11 +423,18 @@ export default function OnboardingPage() {
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null);
 
   useEffect(() => {
+    // Check if system setup was completed
+    const setupApiKey = localStorage.getItem("tact_setup_api_key");
+    if (!setupApiKey) {
+      router.push("/setup");
+      return;
+    }
+
     const savedLang = localStorage.getItem("tact_lang") as "en" | "es";
     if (savedLang === "en" || savedLang === "es") {
       setLang(savedLang);
     }
-  }, []);
+  }, [router]);
 
   const changeLanguage = (l: "en" | "es") => {
     setLang(l);
@@ -831,6 +837,8 @@ export default function OnboardingPage() {
         body: JSON.stringify(payload),
       });
       if (res.ok) {
+        localStorage.removeItem("tact_setup_api_key");
+        localStorage.removeItem("tact_setup_model");
         router.push("/dashboard");
       } else {
         const errorData = await res.json().catch(() => ({}));
@@ -1015,25 +1023,7 @@ export default function OnboardingPage() {
         <div className="glass glass-accent-top p-7 sm:p-9">
           
           {/* Step 0: API & Model Setup */}
-          {step === 0 && (
-            <div className="space-y-6">
-              <div>
-                <h2 className="text-lg font-bold text-white mb-1 heading-brutal">
-                  {t("apiSetup")}
-                </h2>
-                <p className="text-xs text-white/40">
-                  {t("apiSetupDesc")}
-                </p>
-              </div>
-
-              <div className="space-y-5">
-                <div>
-                  <label className="block form-label mb-1.5">{t("openrouterApiKey")}</label>
-                  <Input
-                    type="password"
-                    placeholder="sk-or-v1-..."
-                    value={form.openrouterApiKey}
-                    onChange={(e) => updateForm({ openrouterApiKey: e.target.value })}
+          }
                     className="glass-input h-10 text-xs font-mono"
                   />
                   <p className="text-[10px] text-white/30 mt-1 leading-normal">
@@ -1066,7 +1056,7 @@ export default function OnboardingPage() {
           )}
 
           {/* Step 1: Brand Basics */}
-          {step === 1 && (
+          {step === 0 && (
             <div className="space-y-6">
               <div>
                 <h2 className="text-lg font-bold text-white mb-1 heading-brutal">
@@ -1117,7 +1107,7 @@ export default function OnboardingPage() {
           )}
 
           {/* Step 2: Target Audience */}
-          {step === 2 && (
+          {step === 1 && (
             <div className="space-y-6">
               <div>
                 <h2 className="text-lg font-bold text-white mb-1 heading-brutal">
@@ -1338,7 +1328,7 @@ export default function OnboardingPage() {
           )}
 
           {/* Step 3: Platforms & Formats */}
-          {step === 3 && (
+          {step === 2 && (
             <div className="space-y-6">
               <div>
                 <h2 className="text-lg font-bold text-white mb-1 heading-brutal">
@@ -1449,7 +1439,7 @@ export default function OnboardingPage() {
           )}
 
           {/* Step 4: Content Verticals */}
-          {step === 4 && (
+          {step === 3 && (
             <div className="space-y-6">
               <div>
                 <h2 className="text-lg font-bold text-white mb-1 heading-brutal">
@@ -1504,7 +1494,7 @@ export default function OnboardingPage() {
           )}
 
           {/* Step 5: Tone of Voice */}
-          {step === 5 && (
+          {step === 4 && (
             <div className="space-y-6">
               <div>
                 <h2 className="text-lg font-bold text-white mb-1 heading-brutal">
@@ -1591,7 +1581,7 @@ export default function OnboardingPage() {
           )}
 
           {/* Step 6: Review & AI Audit */}
-          {step === 6 && (
+          {step === 5 && (
             <div className="space-y-6">
               <div>
                 <h2 className="text-lg font-bold text-white mb-1 heading-brutal">
@@ -1789,7 +1779,7 @@ export default function OnboardingPage() {
             <Button
               type="button"
               onClick={() => setStep((s) => s + 1)}
-              disabled={!canProceed() || (step === 2 && form.targetAudience.socioEconomic.length === 0)}
+              disabled={!canProceed() || (step === 1 && form.targetAudience.socioEconomic.length === 0)}
               className="bg-[#00ff88] hover:bg-[#00cc6a] text-[#0a0a1a] font-bold disabled:opacity-20 disabled:cursor-not-allowed transition-all duration-300 glow-sm hover:scale-[1.02] shadow-[0_0_20px_rgba(0,255,136,0.15)] rounded-xl text-xs"
             >
               {t("continue")}
